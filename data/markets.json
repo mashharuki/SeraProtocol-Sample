@@ -1,0 +1,21 @@
+{
+  "data": {
+    "market": {
+      "id": "0xd99802ee8f16d6ff929e27546de15d03fdcce4bd",
+      "quoteToken": {
+        "symbol": "TUSDC",
+        "decimals": "6"
+      },
+      "baseToken": {
+        "symbol": "TWETH",
+        "decimals": "18"
+      },
+      "quoteUnit": "1000",
+      "makerFee": "0",
+      "takerFee": "0",
+      "minPrice": "100000000000000000000",
+      "tickSpace": "10",
+      "latestPrice": "100000000000000640600"
+    }
+  }
+}
