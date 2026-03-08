@@ -3,7 +3,7 @@ export const SUBGRAPH_URL =
 
 export const SEPOLIA_CHAIN_ID = 11155111;
 
-export const ROUTER_ADDRESS = "0x2Bd79b87209b9e8c22C5640e31adBdaF994528cD";
+export const ROUTER_ADDRESS = "0x2bD79b87209B9e8C22C5640e31aDbDaf994528cD";
 
 export const MARKET_ADDRESS = "0xd99802ee8f16d6ff929e27546de15d03fdcce4bd";
 
