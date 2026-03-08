@@ -1,68 +1,64 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/*
+ * Design context (Intentional Design Guard):
+ * 1. WHO: DeFi traders exploring Sera Protocol order lifecycle on Sepolia testnet
+ * 2. MOOD: Professional, precise, trustworthy — like a Bloomberg terminal meets modern fintech
+ * 3. REFERENCE: Japanese financial newspaper layout (Nikkei) — dense information, clear hierarchy
+ */
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@import "tailwindcss";
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@theme {
+  /* Primary: Deep teal — financial trust without AI-purple cliché */
+  --color-sera-900: #0a2e2e;
+  --color-sera-800: #0f3d3d;
+  --color-sera-700: #155050;
+  --color-sera-600: #1a6363;
+  --color-sera-500: #1f7a7a;
+  --color-sera-400: #2da3a3;
+  --color-sera-300: #5cc4c4;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  /* Surfaces: Warm-tinted neutrals (teal-tinted, not pure gray) */
+  --color-surface-50: #f7fafa;
+  --color-surface-100: #eef4f4;
+  --color-surface-200: #dce8e8;
+  --color-surface-300: #b8cece;
+  --color-surface-400: #8aacac;
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+  /* Accent: Warm amber for bids/positive */
+  --color-bid: #d4930a;
+  --color-bid-light: #fef3cd;
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+  /* Ask/negative: Muted rose */
+  --color-ask: #c43c5c;
+  --color-ask-light: #fde2e8;
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  /* Status colors */
+  --color-status-open: #1f7a7a;
+  --color-status-partial: #d4930a;
+  --color-status-filled: #2d8a4e;
+  --color-status-cancelled: #8a8a8a;
+  --color-status-claimed: #5c6bc0;
+  --color-status-pending: #9e9e9e;
+
+  /* Typography */
+  --font-heading: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer base {
+  body {
+    margin: 0;
+    font-family: "DM Sans", system-ui, sans-serif;
+    background-color: var(--color-surface-50);
+    color: var(--color-sera-900);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-width: 320px;
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 }
