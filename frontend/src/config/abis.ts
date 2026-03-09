@@ -5,7 +5,7 @@ export const ROUTER_ABI = [
         components: [
           { name: "market", type: "address" },
           { name: "deadline", type: "uint64" },
-          { name: "claimBounty", type: "uint256" },
+          { name: "claimBounty", type: "uint32" },
           { name: "user", type: "address" },
           { name: "priceIndex", type: "uint16" },
           { name: "rawAmount", type: "uint64" },
@@ -28,7 +28,7 @@ export const ROUTER_ABI = [
         components: [
           { name: "market", type: "address" },
           { name: "deadline", type: "uint64" },
-          { name: "claimBounty", type: "uint256" },
+          { name: "claimBounty", type: "uint32" },
           { name: "user", type: "address" },
           { name: "priceIndex", type: "uint16" },
           { name: "rawAmount", type: "uint64" },

@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { Contract } from "ethers";
+import { useState } from "react";
+import { ERC20_ABI, ROUTER_ABI } from "../config/abis";
 import { ROUTER_ADDRESS } from "../config/constants";
-import { ROUTER_ABI, ERC20_ABI } from "../config/abis";
 import { useWallet } from "./useWallet";
 
 const UINT16_MAX = 65535;
@@ -13,10 +13,30 @@ interface PlaceOrderParams {
   rawAmount: bigint;
   isBid: boolean;
   postOnly: boolean;
+  bestBidIndex?: string;
+  bestAskIndex?: string;
   /** Token address to check balance (quote token for bid, base token for ask) */
   tokenAddress?: string;
   tokenSymbol?: string;
   tokenDecimals?: number;
+}
+
+function resolvePostOnlyPriceIndex(params: PlaceOrderParams): number {
+  if (!params.postOnly) return params.priceIndex;
+
+  let resolved = params.priceIndex;
+  const bestBid = params.bestBidIndex ? Number.parseInt(params.bestBidIndex, 10) : undefined;
+  const bestAsk = params.bestAskIndex ? Number.parseInt(params.bestAskIndex, 10) : undefined;
+
+  if (params.isBid && Number.isInteger(bestAsk) && resolved >= (bestAsk as number)) {
+    resolved = (bestAsk as number) - 1;
+  }
+
+  if (!params.isBid && Number.isInteger(bestBid) && resolved <= (bestBid as number)) {
+    resolved = (bestBid as number) + 1;
+  }
+
+  return resolved;
 }
 
 /** Extract a human-readable error from ethers / RPC errors */
@@ -92,16 +112,18 @@ export function usePlaceOrder() {
       return;
     }
 
+    const resolvedPriceIndex = resolvePostOnlyPriceIndex(params);
+
     // --- Pre-flight validation ---
-    if (params.priceIndex < 0 || params.priceIndex > UINT16_MAX) {
+    if (resolvedPriceIndex < 0 || resolvedPriceIndex > UINT16_MAX) {
       setError(
-        `Price index must be between 0 and ${UINT16_MAX} (uint16). Got: ${params.priceIndex}`,
+        `Price index must be between 0 and ${UINT16_MAX} (uint16). Got: ${resolvedPriceIndex}`,
       );
       return;
     }
 
-    if (!Number.isInteger(params.priceIndex)) {
-      setError(`Price index must be an integer. Got: ${params.priceIndex}`);
+    if (!Number.isInteger(resolvedPriceIndex)) {
+      setError(`Price index must be an integer. Got: ${resolvedPriceIndex}`);
       return;
     }
 
@@ -145,17 +167,17 @@ export function usePlaceOrder() {
       const router = new Contract(ROUTER_ADDRESS, ROUTER_ABI, signer);
       const deadline = BigInt(Math.floor(Date.now() / 1000) + 600); // 10 min
 
-      const orderParams = [
-        params.marketAddress,
+      const orderParams = {
+        market: params.marketAddress,
         deadline,
-        0n,
-        address,
-        params.priceIndex,
-        params.rawAmount,
-        params.postOnly,
-        false,
-        0n,
-      ];
+        claimBounty: 0,
+        user: address,
+        priceIndex: resolvedPriceIndex,
+        rawAmount: params.rawAmount,
+        postOnly: params.postOnly,
+        useNative: false,
+        baseAmount: 0n,
+      };
 
       const fn = params.isBid ? "limitBid" : "limitAsk";
       const tx = await router[fn](orderParams);

@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useMarket } from "../hooks/useMarket";
-import { useDepths } from "../hooks/useDepths";
+import { ErrorAlert } from "../components/common/ErrorAlert";
+import { Spinner } from "../components/common/Spinner";
 import { OrderBook } from "../components/market/OrderBook";
 import { TokenBalances } from "../components/market/TokenBalances";
 import { OrderForm } from "../components/trading/OrderForm";
 import { MARKET_ADDRESS } from "../config/constants";
-import { Spinner } from "../components/common/Spinner";
-import { ErrorAlert } from "../components/common/ErrorAlert";
+import { useDepths } from "../hooks/useDepths";
+import { useMarket } from "../hooks/useMarket";
 
 export function TradingPage() {
   const [selectedPriceIndex, setSelectedPriceIndex] = useState<string>();
@@ -56,6 +56,8 @@ export function TradingPage() {
           <OrderForm
             market={market}
             selectedPriceIndex={selectedPriceIndex}
+            bestBidIndex={bids[0]?.priceIndex}
+            bestAskIndex={asks[0]?.priceIndex}
             onOrderPlaced={refetchDepths}
           />
         </div>

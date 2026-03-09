@@ -1,21 +1,25 @@
-import { useState, useEffect } from "react";
-import type { Market } from "../../types";
-import { useWallet } from "../../hooks/useWallet";
-import { useTokenApproval } from "../../hooks/useTokenApproval";
-import { usePlaceOrder } from "../../hooks/usePlaceOrder";
+import { useEffect, useState } from "react";
 import { SEPOLIA_CHAIN_ID } from "../../config/constants";
-import { Spinner } from "../common/Spinner";
+import { usePlaceOrder } from "../../hooks/usePlaceOrder";
+import { useTokenApproval } from "../../hooks/useTokenApproval";
+import { useWallet } from "../../hooks/useWallet";
+import type { Market } from "../../types";
 import { ErrorAlert } from "../common/ErrorAlert";
+import { Spinner } from "../common/Spinner";
 
 interface OrderFormProps {
   market: Market;
   selectedPriceIndex?: string;
+  bestBidIndex?: string;
+  bestAskIndex?: string;
   onOrderPlaced?: () => void;
 }
 
 export function OrderForm({
   market,
   selectedPriceIndex,
+  bestBidIndex,
+  bestAskIndex,
   onOrderPlaced,
 }: OrderFormProps) {
   const { address, chainId, connect, isConnecting, switchToSepolia } =
@@ -61,6 +65,8 @@ export function OrderForm({
       rawAmount,
       isBid,
       postOnly,
+      bestBidIndex,
+      bestAskIndex,
       tokenAddress: token.id,
       tokenSymbol: token.symbol,
       tokenDecimals: Number(token.decimals),
