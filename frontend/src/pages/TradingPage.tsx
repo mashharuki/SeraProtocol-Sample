@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMarket } from "../hooks/useMarket";
 import { useDepths } from "../hooks/useDepths";
 import { OrderBook } from "../components/market/OrderBook";
+import { TokenBalances } from "../components/market/TokenBalances";
 import { OrderForm } from "../components/trading/OrderForm";
 import { MARKET_ADDRESS } from "../config/constants";
 import { Spinner } from "../components/common/Spinner";
@@ -43,12 +44,15 @@ export function TradingPage() {
             asks={asks}
             quoteUnit={market.quoteUnit}
             loading={depthsLoading}
+            baseSymbol={market.baseToken.symbol}
+            quoteSymbol={market.quoteToken.symbol}
             onSelectPrice={setSelectedPriceIndex}
           />
           {depthsError && <ErrorAlert message={depthsError} />}
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
+          <TokenBalances market={market} />
           <OrderForm
             market={market}
             selectedPriceIndex={selectedPriceIndex}

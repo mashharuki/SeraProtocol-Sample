@@ -1,6 +1,7 @@
 import { useMarket } from "../hooks/useMarket";
 import { useDepths } from "../hooks/useDepths";
 import { MarketInfoCard } from "../components/market/MarketInfoCard";
+import { TokenBalances } from "../components/market/TokenBalances";
 import { OrderBook } from "../components/market/OrderBook";
 import { MARKET_ADDRESS } from "../config/constants";
 import { Spinner } from "../components/common/Spinner";
@@ -34,6 +35,7 @@ export function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-2 space-y-6">
           {market && <MarketInfoCard market={market} />}
+          {market && <TokenBalances market={market} />}
 
           {/* Contract reference */}
           <div className="rounded-xl border border-surface-200 bg-white p-4 text-xs text-surface-400">
@@ -53,6 +55,8 @@ export function DashboardPage() {
               asks={asks}
               quoteUnit={market.quoteUnit}
               loading={depthsLoading}
+              baseSymbol={market.baseToken.symbol}
+              quoteSymbol={market.quoteToken.symbol}
             />
           )}
           {depthsError && <ErrorAlert message={depthsError} />}

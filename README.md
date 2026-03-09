@@ -13,6 +13,15 @@ curl -s -X POST \
   https://api.goldsky.com/api/public/project_cmicv6kkbhyto01u3agb155hg/subgraphs/sera-pro/1.0.9/gn | jq
 ```
 
+list
+
+```bash
+curl -s -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ markets(first: 5) { id quoteToken { symbol } baseToken { symbol } latestPrice latestPriceIndex } }"}' \
+  https://api.goldsky.com/api/public/project_cmicv6kkbhyto01u3agb155hg/subgraphs/sera-pro/1.0.9/gn | jq
+```
+
 ### Order
 
 ```bash

@@ -54,12 +54,16 @@ export function OrderForm({
     e.preventDefault();
     if (!priceIndex || !amount) return;
     clearError();
+    const token = isBid ? market.quoteToken : market.baseToken;
     const hash = await placeOrder({
       marketAddress: market.id,
       priceIndex: Number(priceIndex),
       rawAmount,
       isBid,
       postOnly,
+      tokenAddress: token.id,
+      tokenSymbol: token.symbol,
+      tokenDecimals: Number(token.decimals),
     });
     if (hash) {
       setAmount("");

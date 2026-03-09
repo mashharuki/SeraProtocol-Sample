@@ -3,8 +3,8 @@ export const SUBGRAPH_URL =
 
 export const SEPOLIA_CHAIN_ID = 11155111;
 
-export const ROUTER_ADDRESS = "0x2bD79b87209B9e8C22C5640e31aDbDaf994528cD";
+export const ROUTER_ADDRESS = "0x82bfe1b31b6c1c3d201a0256416a18d93331d99e";
 
-export const MARKET_ADDRESS = "0xd99802ee8f16d6ff929e27546de15d03fdcce4bd";
+export const MARKET_ADDRESS = "0x002930b390ac7d686f07cffb9d7ce39609d082d1";
 
 export const REOWN_PROJECT_ID = import.meta.env.VITE_REOWN_PROJECT_ID as string;

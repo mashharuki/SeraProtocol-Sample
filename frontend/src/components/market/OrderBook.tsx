@@ -7,6 +7,8 @@ interface OrderBookProps {
   asks: Depth[];
   quoteUnit: string;
   loading: boolean;
+  baseSymbol?: string;
+  quoteSymbol?: string;
   onSelectPrice?: (priceIndex: string) => void;
 }
 
@@ -51,6 +53,8 @@ export function OrderBook({
   asks,
   quoteUnit,
   loading,
+  baseSymbol,
+  quoteSymbol,
   onSelectPrice,
 }: OrderBookProps) {
   if (loading) {
@@ -66,15 +70,27 @@ export function OrderBook({
 
   return (
     <div className="rounded-xl border border-surface-200 bg-white overflow-hidden">
-      <div className="px-4 py-3 border-b border-surface-200">
+      <div className="px-4 py-3 border-b border-surface-200 flex items-center justify-between">
         <h3 className="font-heading text-sm font-semibold text-sera-800">
           Order Book
         </h3>
+        {baseSymbol && quoteSymbol && (
+          <span className="text-xs font-mono text-surface-500 bg-surface-50 px-2 py-0.5 rounded">
+            {baseSymbol}/{quoteSymbol}
+          </span>
+        )}
       </div>
 
       {/* Column headers */}
       <div className="grid grid-cols-3 gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-surface-400 border-b border-surface-100">
-        <span>Index</span>
+        <span>
+          Index
+          {baseSymbol && quoteSymbol && (
+            <span className="normal-case tracking-normal text-surface-300 ml-1">
+              ({baseSymbol}/{quoteSymbol})
+            </span>
+          )}
+        </span>
         <span className="text-right">Price</span>
         <span className="text-right">Amount</span>
       </div>
