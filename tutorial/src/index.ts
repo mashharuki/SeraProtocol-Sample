@@ -1,4 +1,3 @@
-#!/usr/bin/env bun
 import "dotenv/config";
 import { formatUnits, isAddress, type Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -62,6 +61,7 @@ async function main() {
     `Latest: index=${market.latestPriceIndex}, price=${formatUnits(BigInt(market.latestPrice), Number(market.quoteToken.decimals))}`,
   );
 
+  // get token balances
   const baseTokenAddress = market.baseToken.id as Address;
   const quoteTokenAddress = market.quoteToken.id as Address;
   const [baseBalance, quoteBalance] = await Promise.all([
@@ -116,6 +116,7 @@ async function main() {
       `Claim target: isBid=${targetOrder.isBid}, priceIndex=${targetOrder.priceIndex}, orderIndex=${targetOrder.orderIndex}, claimable=${targetOrder.claimableAmount}`,
     );
 
+    // Claim proceeds
     const claimTx = await claimOrder({
       publicClient,
       walletClient,
@@ -130,6 +131,7 @@ async function main() {
   // 4. Place a limit order
   const latestPriceIndex = Number(market.latestPriceIndex);
   const requestedPriceIndex = cli.priceIndex ?? Math.max(1, latestPriceIndex - 100);
+  // Ensure the price index is valid and won't cause immediate execution
   const priceIndex = resolvePostOnlyBidPriceIndex({
     desiredPriceIndex: requestedPriceIndex,
     bids: depth.bids,
@@ -148,6 +150,7 @@ async function main() {
     `Placing limit bid: priceIndex=${priceIndex}, rawAmount=${rawAmount.toString()}, approve=${approveAmount.toString()}`,
   );
 
+  // Approve quote token if needed
   const approveTx = await approveTokenIfNeeded({
     publicClient,
     walletClient,
@@ -163,6 +166,7 @@ async function main() {
     console.log("Allowance already sufficient; skipping approve");
   }
 
+  // Place limit bid
   const orderTx = await placeLimitBid({
     publicClient,
     walletClient,
@@ -206,6 +210,7 @@ async function main() {
       );
     }
   } else {
+    // Claim proceeds
     const claimTx = await claimOrder({
       publicClient,
       walletClient,
