@@ -1,0 +1,33 @@
+{
+  "name": "sera-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for SeraProtocol - Natural language interface for decentralized order book trading",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "sera-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "format": "pnpm exec biome format --write .",
+    "start": "node dist/index.js",
+    "start:http": "TRANSPORT=http node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "dev:http": "TRANSPORT=http tsx watch src/index.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "viem": "^2.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.6",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
