@@ -1,0 +1,47 @@
+{
+  "eval_id": 1,
+  "eval_name": "graphql-orderbook",
+  "prompt": "SeraProtocolのサブグラフからTWETH/TUSDCマーケットの板情報（bid/ask各5本）を取得するTypeScriptスクリプトを書いてください。viemは使わずfetchだけで。",
+  "assertions": [
+    {
+      "name": "correct_subgraph_url",
+      "description": "Uses the correct Goldsky subgraph URL: api.goldsky.com/api/public/project_cmicv6kkbhyto01u3agb155hg/subgraphs/sera-pro/1.0.9/gn",
+      "type": "contains"
+    },
+    {
+      "name": "correct_market_address",
+      "description": "References the TWETH/TUSDC market address 0x002930b390ac7d686f07cffb9d7ce39609d082d1",
+      "type": "contains"
+    },
+    {
+      "name": "bid_ask_separation",
+      "description": "Queries bids and asks separately with correct isBid true/false filters",
+      "type": "semantic"
+    },
+    {
+      "name": "correct_sort_order",
+      "description": "Bids sorted desc (highest first), asks sorted asc (lowest first)",
+      "type": "semantic"
+    },
+    {
+      "name": "rawAmount_filter",
+      "description": "Filters out empty levels with rawAmount_gt: 0",
+      "type": "contains"
+    },
+    {
+      "name": "first_5_limit",
+      "description": "Limits results to 5 per side (first: 5)",
+      "type": "semantic"
+    },
+    {
+      "name": "no_viem_import",
+      "description": "Does NOT import or use viem — uses only fetch",
+      "type": "absence"
+    },
+    {
+      "name": "valid_typescript",
+      "description": "Output is valid TypeScript that would compile",
+      "type": "semantic"
+    }
+  ]
+}

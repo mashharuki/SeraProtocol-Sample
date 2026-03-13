@@ -1,0 +1,15 @@
+{
+  "eval_id": 2,
+  "run_type": "with_skill",
+  "expectations": [
+    {"text": "correct_router_address", "passed": true, "evidence": "Line 33: ROUTER_ADDRESS = '0x82bfe1b31b6c1c3d201a0256416a18d93331d99e'"},
+    {"text": "erc20_approve_step", "passed": true, "evidence": "Lines 277-326: Full allowance check + conditional approve with receipt wait"},
+    {"text": "simulate_before_send", "passed": true, "evidence": "Lines 344-361: simulateContract before writeContract"},
+    {"text": "correct_limit_order_params", "passed": true, "evidence": "Lines 332-342: All 9 fields including claimBounty, priceIndex=12000 (via resolvedPriceIndex), rawAmount=500n, postOnly=true, baseAmount=0n"},
+    {"text": "wait_for_receipt", "passed": true, "evidence": "Line 381: waitForTransactionReceipt"},
+    {"text": "uses_viem", "passed": true, "evidence": "Lines 15-22: createPublicClient, createWalletClient, http imports"},
+    {"text": "sepolia_chain", "passed": true, "evidence": "Lines 46-55: defineChain with id 11155111"},
+    {"text": "deadline_set", "passed": true, "evidence": "Line 331: BigInt(Math.floor(Date.now() / 1000) + 3600)"},
+    {"text": "complete_flow", "passed": true, "evidence": "Full 8-step flow: market info -> orderbook -> allowance check -> approve -> simulate -> send -> wait -> poll status"}
+  ]
+}

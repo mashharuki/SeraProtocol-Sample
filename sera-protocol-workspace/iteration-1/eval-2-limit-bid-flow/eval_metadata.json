@@ -1,0 +1,52 @@
+{
+  "eval_id": 2,
+  "eval_name": "limit-bid-flow",
+  "prompt": "Sera ProtocolでlimitBidを出すための完全な手順を教えて。トークンのapproveからtx送信、確認待ちまで。viemを使った具体的なコード例をください。priceIndex=12000, rawAmount=500で。",
+  "assertions": [
+    {
+      "name": "correct_router_address",
+      "description": "Uses Router address 0x82bfe1b31b6c1c3d201a0256416a18d93331d99e",
+      "type": "contains"
+    },
+    {
+      "name": "erc20_approve_step",
+      "description": "Includes ERC20 approve step before placing the order",
+      "type": "semantic"
+    },
+    {
+      "name": "simulate_before_send",
+      "description": "Uses simulateContract before writeContract (best practice)",
+      "type": "semantic"
+    },
+    {
+      "name": "correct_limit_order_params",
+      "description": "LimitOrderParams includes market, deadline, user, priceIndex(12000), rawAmount(500), postOnly, useNative, baseAmount",
+      "type": "semantic"
+    },
+    {
+      "name": "wait_for_receipt",
+      "description": "Calls waitForTransactionReceipt after sending",
+      "type": "contains"
+    },
+    {
+      "name": "uses_viem",
+      "description": "Imports from viem (createWalletClient, createPublicClient, etc.)",
+      "type": "contains"
+    },
+    {
+      "name": "sepolia_chain",
+      "description": "Targets Sepolia testnet (chain: sepolia)",
+      "type": "contains"
+    },
+    {
+      "name": "deadline_set",
+      "description": "Sets a future deadline timestamp (not zero or missing)",
+      "type": "semantic"
+    },
+    {
+      "name": "complete_flow",
+      "description": "Covers the full lifecycle: approve → place → confirm (all 3 steps)",
+      "type": "semantic"
+    }
+  ]
+}

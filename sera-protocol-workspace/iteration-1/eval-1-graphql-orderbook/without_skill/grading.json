@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "run_type": "without_skill",
+  "expectations": [
+    {"text": "correct_subgraph_url", "passed": true, "evidence": "Line 10: Correct Goldsky URL (found from codebase inspection)"},
+    {"text": "correct_market_address", "passed": true, "evidence": "Line 12: MARKET_ADDRESS = '0x002930b390ac7d686f07cffb9d7ce39609d082d1'"},
+    {"text": "bid_ask_separation", "passed": true, "evidence": "Lines 36-56: Separate bids/asks with isBid: true/false"},
+    {"text": "correct_sort_order", "passed": true, "evidence": "Lines 39,49: bids desc, asks asc"},
+    {"text": "rawAmount_filter", "passed": true, "evidence": "Lines 37,47: rawAmount_gt: '0'"},
+    {"text": "first_5_limit", "passed": true, "evidence": "Line 89: depth = 5"},
+    {"text": "no_viem_import", "passed": true, "evidence": "No viem import. Uses only fetch"},
+    {"text": "valid_typescript", "passed": true, "evidence": "Proper types and async/await. Compilable."}
+  ]
+}
