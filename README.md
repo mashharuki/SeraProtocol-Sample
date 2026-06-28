@@ -66,3 +66,7 @@ curl -s -X POST \
 - [DeepWiki GitHub Sera MCP](https://deepwiki.com/sera-cx/sera-mcp)
 - [Deepwiki sera-cx/sera-agents](https://deepwiki.com/sera-cx/sera-agents)
 - [DeepWiki Sera Agent Guide](https://deepwiki.com/search/_108fa0cb-1bd7-4ff8-8e34-9fad481690c4)
+- [GitHub SeraProtocol OrderBook Contract V2](https://github.com/sera-cx/orderbook-contract-v2)
+- [GitHub Sera Pay](https://github.com/sera-cx/sera-pay)
+- [Deepwiki SeraProtocol OrderBook Contract V2](https://deepwiki.com/sera-cx/orderbook-contract-v2)
+- [Deepwiki Sera Pay](https://deepwiki.com/sera-cx/sera-pay)
