@@ -1,0 +1,6 @@
+[submodule "sera-mcp"]
+	path = sera-mcp
+	url = https://github.com/sera-cx/sera-mcp
+[submodule "sera-agents"]
+	path = sera-agents
+	url = https://github.com/sera-cx/sera-agents
