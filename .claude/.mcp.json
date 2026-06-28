@@ -37,6 +37,14 @@
       "type": "stdio",
       "command": "codegraph",
       "args": ["serve", "--mcp"]
+    },
+    "sera": {
+      "command": "node",
+      "args": ["/Users/harukikondo/git/SeraProtocol-Sample/sera-mcp/dist/index.js"],
+      "env": {
+        "SERA_NETWORK": "mainnet",
+        "POLICY_PRESET": "standard"
+      }
     }
   }
 }
