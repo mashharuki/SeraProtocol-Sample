@@ -57,3 +57,12 @@ curl -s -X POST \
   -d '{"query": "{ tokens(where: { symbol_contains_nocase: \"USD\" }) { id symbol name decimals } }"}' \
   https://api.goldsky.com/api/public/project_cmicv6kkbhyto01u3agb155hg/subgraphs/sera-pro/1.0.9/gn | jq
 ```
+
+## Reference
+- [Testnet App](https://testnet.sera.cx/)
+- [Sera Agent Page](https://agents.sera.cx/)
+- [GitHub sera-cx/sera-agents](https://github.com/sera-cx/sera-agents/tree/main)
+- [GitHub Sera MCP](https://github.com/sera-cx/sera-mcp)
+- [DeepWiki GitHub Sera MCP](https://deepwiki.com/sera-cx/sera-mcp)
+- [Deepwiki sera-cx/sera-agents](https://deepwiki.com/sera-cx/sera-agents)
+- [DeepWiki Sera Agent Guide](https://deepwiki.com/search/_108fa0cb-1bd7-4ff8-8e34-9fad481690c4)
