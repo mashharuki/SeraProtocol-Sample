@@ -1,4 +1,12 @@
-# Sera Protocol Smart Contract Reference
+# Sera Protocol Smart Contract Reference (v1 — deployed, price-level CLOB)
+
+> This file documents the **v1** Router/OrderBook/PriceBook contracts — the price-level CLOB
+> (`priceIndex`, NFT orders, `limitBid`/`limitAsk`) that the GraphQL subgraph and this sample
+> repo's `tutorial/`, `frontend/`, and `mcp-server/` all actually integrate against today.
+>
+> `sera-cx/orderbook-contract-v2` is a **separate, non-compatible** architecture (off-chain
+> signed orders + Vault custody + Smart Order Router) — see `references/orderbook-v2.md`.
+> Confirm which version the user means before reusing structs/function names across the two.
 
 ## Table of Contents
 1. [Contract Addresses](#addresses)

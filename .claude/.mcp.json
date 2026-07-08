@@ -5,24 +5,9 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"]
     },
-    "deepwiki": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://mcp.deepwiki.com/sse"
-      ]
-    },
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    },
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["chrome-devtools-mcp@latest"]
-    },
-    "drawio": {
-      "command": "npx",
-      "args": ["@drawio/mcp@latest"]
     },
     "serena": {
       "command": "uvx",
@@ -42,7 +27,7 @@
       "command": "node",
       "args": ["/Users/harukikondo/git/SeraProtocol-Sample/sera-mcp/dist/index.js"],
       "env": {
-        "SERA_NETWORK": "mainnet",
+        "SERA_NETWORK": "testnet",
         "POLICY_PRESET": "standard"
       }
     }
