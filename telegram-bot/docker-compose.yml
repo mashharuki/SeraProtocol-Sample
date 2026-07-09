@@ -1,0 +1,34 @@
+services:
+  sera-fx-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sera-fx-bot
+    restart: unless-stopped
+    # .env をコンテナの環境変数として自動読込（.env.example をコピーして作成）
+    env_file:
+      - .env
+    environment:
+      # ローカル compose では polling がデフォルト。.env に BOT_MODE があればそちらが優先される
+      BOT_MODE: ${BOT_MODE:-polling}
+      # SQLite をマウント先に固定（.env の相対パス設定に依存しない）
+      DATABASE_URL: ${DATABASE_URL:-file:/app/data/bot.db}
+      # コンテナ内は常に 3000 で待ち受け（公開ポートは .env の PORT で変更可能）
+      PORT: "3000"
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      # LibSQL ローカルファイルの永続化
+      - ./data:/app/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "-e",
+          "fetch('http://localhost:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

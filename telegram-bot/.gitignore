@@ -26,3 +26,13 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+# runtime data (SQLite)
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# mastra build output
+.mastra/
+dist/
