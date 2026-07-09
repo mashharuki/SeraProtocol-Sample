@@ -62,6 +62,23 @@ export const ja: MessageCatalog = {
     }`,
   balanceEmpty:
     "まだステーブルコインの残高がありません。ウォレットアドレス（/wallet で確認）にトークンを送ってください。",
+  balanceEmptySepoliaHint:
+    "⚠️ <b>Sepolia での注意:</b> Circle faucet の USDC は<i>別のトークン</i>のため、Sera では使えません。/faucet で Sera のテスト用ステーブルコインを無料で入手できます！",
+
+  // ---- /faucet (Sepolia test tokens) ----
+  faucetIntro:
+    "🚰 <b>Sera テストトークン faucet</b>\n\nSepolia で Sera のテスト用ステーブルコイン（USDC・EURC・JPYC など）のスターターパックを無料で受け取れます。1ウォレットにつき1回です。\n\n⛽ クレイムのトランザクションには少額の Sepolia ETH（ガス代）が必要です。",
+  faucetOnlySepolia:
+    "faucet は Sepolia 専用です。まず /network で切り替えてください。",
+  faucetAlreadyClaimed:
+    "✅ このウォレットは faucet からクレイム済みです。/balance を確認してください — まだ届いていない場合は配布処理中の可能性があります。",
+  faucetPendingDistribution:
+    "⏳ クレイムは受付済みで、配布処理中です。まもなく /balance に反映されます。",
+  faucetConfirmCard: (ethBalance: string) =>
+    `<b>🔎 faucet クレイムの確認</b>\n\n受け取り: Sera テスト用ステーブルコイン → あなたのウォレット\n🌐 Sepolia Testnet\n\n⛽ ガス代は ETH から支払われます（残高: <b>${ethBalance}</b>）。`,
+  faucetClaiming: "faucet クレイムを送信しています… ⏳",
+  faucetSuccess: (txUrl: string) =>
+    `🎉 <b>faucet クレイム完了！</b> <a href="${txUrl}">トランザクションを確認</a>\n\nトークンはバッチ処理で配布されるため、反映まで数分かかることがあります。しばらくしてから /balance で確認してください。`,
   balanceVaultHint:
     "💡 <i>ウォレット = 直接保有しているトークン。ボールト = 指値注文用に Sera に預けたトークン。</i>",
 
@@ -189,6 +206,7 @@ export const ja: MessageCatalog = {
     "<b>コマンド</b>\n" +
     "/wallet — アドレスの確認と入金方法\n" +
     "/balance — ETH とステーブルコインの残高\n" +
+    "/faucet — Sepolia テストトークンを無料入手\n" +
     "/rate — リアルタイム為替レート\n" +
     "/swap — 即時両替（ETH 不要）\n" +
     "/send — 両替して別のアドレスへ送金\n" +

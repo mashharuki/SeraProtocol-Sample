@@ -84,6 +84,23 @@ export const en = {
     }`,
   balanceEmpty:
     "No stablecoin balances yet. Send tokens to your wallet address (see /wallet) to get started.",
+  balanceEmptySepoliaHint:
+    "⚠️ <b>Sepolia note:</b> USDC from the Circle faucet is a <i>different</i> token and cannot be used on Sera. Get free Sera test stablecoins with /faucet instead!",
+
+  // ---- /faucet (Sepolia test tokens) ----
+  faucetIntro:
+    "🚰 <b>Sera test-token faucet</b>\n\nClaim a free starter pack of Sera test stablecoins (USDC, EURC, JPYC and more) on Sepolia. One claim per wallet.\n\n⛽ The claim transaction needs a little Sepolia ETH for gas.",
+  faucetOnlySepolia:
+    "The faucet only exists on Sepolia. Switch with /network first.",
+  faucetAlreadyClaimed:
+    "✅ This wallet has already claimed from the faucet. Check /balance — if tokens haven't arrived yet, distribution may still be in progress.",
+  faucetPendingDistribution:
+    "⏳ Your claim is registered and distribution is in progress. Tokens appear in /balance shortly.",
+  faucetConfirmCard: (ethBalance: string) =>
+    `<b>🔎 Please review your faucet claim</b>\n\nClaim: free Sera test stablecoins → your wallet\n🌐 Sepolia Testnet\n\n⛽ Gas is paid in ETH (you have <b>${ethBalance}</b>).`,
+  faucetClaiming: "Submitting your faucet claim… ⏳",
+  faucetSuccess: (txUrl: string) =>
+    `🎉 <b>Faucet claim confirmed!</b> <a href="${txUrl}">View the transaction</a>\n\nTokens are distributed in batches and can take a few minutes to appear — check /balance shortly.`,
   balanceVaultHint:
     "💡 <i>Wallet = tokens you hold directly. Vault = tokens deposited into Sera for limit orders.</i>",
 
@@ -211,6 +228,7 @@ export const en = {
     "<b>Commands</b>\n" +
     "/wallet — your address &amp; how to fund it\n" +
     "/balance — ETH + stablecoin balances\n" +
+    "/faucet — free Sepolia test stablecoins\n" +
     "/rate — live FX rates\n" +
     "/swap — instant exchange (no ETH needed)\n" +
     "/send — exchange &amp; send to another address\n" +

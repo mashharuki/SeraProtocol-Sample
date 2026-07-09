@@ -12,6 +12,7 @@ import { PrivySigner } from "../privy/signer";
 import { SeraClient } from "../sera/client";
 import { AccountService } from "./account-service";
 import { DepositService } from "./deposit-service";
+import { FaucetService } from "./faucet-service";
 import { OrderService } from "./order-service";
 import { PendingActionService } from "./pending-actions";
 import { RateService } from "./rate-service";
@@ -26,6 +27,7 @@ export interface Services {
   swaps: SwapService;
   orders: OrderService;
   deposits: DepositService;
+  faucet: FaucetService;
   pendingActions: PendingActionService;
   /** Public (unauthenticated) Sera client for a network. */
   publicSera: (network: Network) => SeraClient;
@@ -87,6 +89,7 @@ export function buildServices(config: AppConfig, db: Db): Services {
     signer,
     authedSera,
   );
+  const faucet = new FaucetService(config, accounts, pendingActions, signer);
 
   return {
     config,
@@ -96,6 +99,7 @@ export function buildServices(config: AppConfig, db: Db): Services {
     swaps,
     orders,
     deposits,
+    faucet,
     pendingActions,
     publicSera,
     authedSera,

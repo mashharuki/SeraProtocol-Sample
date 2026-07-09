@@ -71,6 +71,13 @@ actionsComposer.callbackQuery(/^act:c:(.+)$/, async (ctx) => {
         parse_mode: "HTML",
         link_preview_options: { is_disabled: true },
       });
+    } else if (kind === "faucet_claim") {
+      await ctx.reply(ctx.t("faucetClaiming"));
+      const res = await ctx.services.faucet.executeClaim(user);
+      await ctx.reply(ctx.t("faucetSuccess", res.txUrl), {
+        parse_mode: "HTML",
+        link_preview_options: { is_disabled: true },
+      });
     }
   } catch (err) {
     console.error(`execute ${kind} failed:`, err);

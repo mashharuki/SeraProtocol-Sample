@@ -33,7 +33,8 @@ export type PendingActionKind =
   | "send"
   | "limit_order"
   | "cancel_order"
-  | "deposit";
+  | "deposit"
+  | "faucet_claim";
 
 export interface PendingActionRow {
   id: string;
