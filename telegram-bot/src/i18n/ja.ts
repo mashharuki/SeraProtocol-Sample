@@ -79,6 +79,8 @@ export const ja: MessageCatalog = {
   faucetClaiming: "faucet クレイムを送信しています… ⏳",
   faucetSuccess: (txUrl: string) =>
     `🎉 <b>faucet クレイム完了！</b> <a href="${txUrl}">トランザクションを確認</a>\n\nトークンはバッチ処理で配布されるため、反映まで数分かかることがあります。しばらくしてから /balance で確認してください。`,
+  balanceMore: (n: number) =>
+    `…ほか ${n} トークンに残高があります。特定のトークンについては「GYEN はいくら持ってる？」のように質問してください。`,
   balanceVaultHint:
     "💡 <i>ウォレット = 直接保有しているトークン。ボールト = 指値注文用に Sera に預けたトークン。</i>",
 

@@ -82,8 +82,19 @@ accountComposer.command("balance", async (ctx) => {
         lines.push("", ctx.t("balanceEmptySepoliaHint"));
       }
     } else {
+      // The faucet funds 100+ tokens at once; Telegram messages are capped
+      // at 4096 chars, so show the most relevant rows and summarize the rest.
+      const MAX_ROWS = 20;
+      const shown = [...nonZero]
+        .sort(
+          (a, b) =>
+            Number(b.vaultAvailable) - Number(a.vaultAvailable) ||
+            Number(b.wallet) - Number(a.wallet) ||
+            a.symbol.localeCompare(b.symbol),
+        )
+        .slice(0, MAX_ROWS);
       lines.push(ctx.t("balanceHeader"));
-      for (const token of nonZero) {
+      for (const token of shown) {
         lines.push(
           ctx.t(
             "balanceRow",
@@ -93,6 +104,9 @@ accountComposer.command("balance", async (ctx) => {
             token.vaultFrozen,
           ),
         );
+      }
+      if (nonZero.length > shown.length) {
+        lines.push("", ctx.t("balanceMore", nonZero.length - shown.length));
       }
       lines.push("", ctx.t("balanceVaultHint"));
     }

@@ -152,3 +152,7 @@ GCP_PROJECT_ID=my-project REGION=us-central1 SERVICE_NAME=my-bot ./scripts/deplo
 - 同一通貨送金（例: USDC → USDC）は未対応（「準備中」表示）
 - Sera API secret は平文で DB 保存（read/tx-builder 権限のみ）。AES-GCM 暗号化は fast-follow
 - Sepolia は流動性が薄く `NO_LIQUIDITY` が出やすい — 少額で試すこと
+
+## Example Wallet 
+
+[Sepolia 0x7eb0348ebfde6c9c7094fb921663e6a12d950bbe](https://sepolia.etherscan.io/address/0x7eb0348ebfde6c9c7094fb921663e6a12d950bbe)

@@ -101,6 +101,8 @@ export const en = {
   faucetClaiming: "Submitting your faucet claim… ⏳",
   faucetSuccess: (txUrl: string) =>
     `🎉 <b>Faucet claim confirmed!</b> <a href="${txUrl}">View the transaction</a>\n\nTokens are distributed in batches and can take a few minutes to appear — check /balance shortly.`,
+  balanceMore: (n: number) =>
+    `…and ${n} more tokens with a balance. Ask me about a specific token (e.g. “How much GYEN do I have?”) to see it.`,
   balanceVaultHint:
     "💡 <i>Wallet = tokens you hold directly. Vault = tokens deposited into Sera for limit orders.</i>",
 

@@ -97,17 +97,25 @@ export const getBalancesTool = createTool({
     const res = await requireUser(context?.requestContext);
     if ("error" in res) return { result: res.error };
     const summary = await res.services.accounts.getSummary(res.user);
+    const nonZero = summary.tokens.filter((t) => !t.isZero);
+    // Faucet-funded wallets hold 100+ tokens; cap the listing.
+    const MAX_ROWS = 30;
     const lines = [
       `Address: ${summary.address}`,
       `Network: ${res.user.network}`,
       `ETH (gas): ${summary.eth}`,
-      ...summary.tokens
-        .filter((t) => !t.isZero)
+      ...nonZero
+        .slice(0, MAX_ROWS)
         .map(
           (t) =>
             `${t.symbol}: wallet=${t.wallet}, vault_available=${t.vaultAvailable}, vault_frozen=${t.vaultFrozen}`,
         ),
     ];
+    if (nonZero.length > MAX_ROWS) {
+      lines.push(
+        `…and ${nonZero.length - MAX_ROWS} more tokens with a balance (list truncated).`,
+      );
+    }
     return { result: lines.join("\n") };
   },
 });
