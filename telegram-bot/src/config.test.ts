@@ -39,8 +39,8 @@ describe("loadConfig", () => {
   });
 
   test("invalid PUBLIC_URL still fails loudly", () => {
-    expect(() =>
-      loadConfig({ ...required, PUBLIC_URL: "not-a-url" }),
-    ).toThrow(/PUBLIC_URL/);
+    expect(() => loadConfig({ ...required, PUBLIC_URL: "not-a-url" })).toThrow(
+      /PUBLIC_URL/,
+    );
   });
 });

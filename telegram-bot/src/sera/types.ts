@@ -70,16 +70,22 @@ export const configSchema = z.object({
 });
 export type SeraConfig = z.infer<typeof configSchema>;
 
-export const balanceEntrySchema = z.object({
+// Live shape (verified on api-testnet.sera.cx 2026-07-09):
+// {owner_address, balances: [BalanceRow], updated_at, wallet_balance_available}
+export const balanceRowSchema = z.object({
+  symbol: z.string(),
+  address: z.string().optional(),
+  decimals: z.number(),
   wallet_balance: z.string(),
   vault_available: z.string(),
   vault_frozen: z.string(),
   vault_total: z.string().optional(),
   total: z.string().optional(),
 });
-export type SeraBalanceEntry = z.infer<typeof balanceEntrySchema>;
-// /balances returns a map keyed by token symbol (or address) → entry
-export const balancesSchema = z.record(z.string(), z.unknown());
+export type SeraBalanceRow = z.infer<typeof balanceRowSchema>;
+export const balancesResponseSchema = z.object({
+  balances: z.array(balanceRowSchema),
+});
 
 /** EIP-712 typed data as returned verbatim by Sera (route_params / preview). */
 export const typedDataSchema = z.object({

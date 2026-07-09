@@ -45,9 +45,9 @@ export class UserService {
    * sign EIP-712 ManageApiKey with the Privy wallet, POST /api-keys,
    * store the one-time secret.
    *
-   * NOTE: the ManageApiKey struct fields {owner, action, timestamp} come
-   * from the API reference; the exact type layout must be confirmed
-   * against the live API during E2E (Phase 3 verification item).
+   * Struct and body verified live on api-testnet.sera.cx (2026-07-09):
+   * sign ManageApiKey {owner: address, action: string, timestamp: uint256},
+   * submit {owner_address, action, timestamp, signature}.
    */
   async ensureApiKey(user: UserRow): Promise<{ key: string; secret: string }> {
     const existing = await this.apiKeys.find(user.telegramUserId, user.network);
@@ -59,11 +59,6 @@ export class UserService {
       sera.getSystemTime(),
     ]);
 
-    const message = {
-      owner: user.walletAddress,
-      action: "create",
-      timestamp: serverTime,
-    };
     const signature = await this.signer.signTypedData(user.walletId, {
       domain: config.eip712_domain as unknown as Record<string, unknown>,
       types: {
@@ -74,14 +69,18 @@ export class UserService {
         ],
       },
       primaryType: "ManageApiKey",
-      message,
+      message: {
+        owner: user.walletAddress,
+        action: "create",
+        timestamp: serverTime,
+      },
     });
 
     const created = await sera.createApiKey({
-      ...message,
+      owner_address: user.walletAddress,
       action: "create",
+      timestamp: serverTime,
       signature,
-      label: `telegram-bot-${user.telegramUserId}`,
     });
     await this.apiKeys.save(user.telegramUserId, user.network, {
       apiKey: created.api_key,

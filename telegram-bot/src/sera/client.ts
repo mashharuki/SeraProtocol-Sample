@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { SeraApiError } from "./errors";
 import {
   apiKeyCreateSchema,
-  balanceEntrySchema,
+  balancesResponseSchema,
   configSchema,
   fxRateSchema,
   healthSchema,
@@ -12,7 +12,7 @@ import {
   orderPreviewSchema,
   orderStatusSchema,
   orderSubmitResultSchema,
-  type SeraBalanceEntry,
+  type SeraBalanceRow,
   type SeraConfig,
   type SeraFxRate,
   type SeraMarket,
@@ -165,41 +165,28 @@ export class SeraClient {
   // ---- api keys ----
 
   /**
-   * Create an API key for a wallet. `payload` is the signed EIP-712
-   * ManageApiKey message fields; api_secret is returned only once.
+   * Create an API key for a wallet. Body shape verified live 2026-07-09:
+   * exactly {owner_address, action, timestamp, signature} — extra fields
+   * (e.g. a label) are rejected with 422. api_secret is returned only once.
    */
   async createApiKey(payload: {
-    owner: string;
+    owner_address: string;
     action: "create";
     timestamp: number;
     signature: string;
-    label?: string;
   }): Promise<{ api_key: string; api_secret: string }> {
     return this.request("/api-keys", apiKeyCreateSchema, { body: payload });
   }
 
   // ---- balances ----
 
-  /** ownerAddress MUST be lowercase (read endpoints are case-sensitive). */
-  async getBalances(
-    ownerAddress: string,
-  ): Promise<Record<string, SeraBalanceEntry>> {
-    const raw = await this.request(
-      "/balances",
-      // parse leniently, then validate entries below
-      orderPreviewSchema,
-      { auth: true, query: { owner_address: ownerAddress.toLowerCase() } },
-    );
-    const out: Record<string, SeraBalanceEntry> = {};
-    const entries =
-      typeof raw.balances === "object" && raw.balances !== null
-        ? (raw.balances as Record<string, unknown>)
-        : raw;
-    for (const [token, entry] of Object.entries(entries)) {
-      const parsed = balanceEntrySchema.safeParse(entry);
-      if (parsed.success) out[token] = parsed.data;
-    }
-    return out;
+  /** ownerAddress is lowercased internally (read endpoints are case-sensitive). */
+  async getBalances(ownerAddress: string): Promise<SeraBalanceRow[]> {
+    const res = await this.request("/balances", balancesResponseSchema, {
+      auth: true,
+      query: { owner_address: ownerAddress.toLowerCase() },
+    });
+    return res.balances;
   }
 
   // ---- swap ----

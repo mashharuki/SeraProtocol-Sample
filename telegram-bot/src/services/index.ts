@@ -69,7 +69,7 @@ export function buildServices(config: AppConfig, db: Db): Services {
 
   const pendingActions = new PendingActionService(pendingRepo);
   const rates = new RateService(publicSera);
-  const accounts = new AccountService(config, rates, authedSera);
+  const accounts = new AccountService(config, authedSera);
   const swaps = new SwapService(rates, pendingActions, signer, publicSera);
   const orders = new OrderService(
     rates,

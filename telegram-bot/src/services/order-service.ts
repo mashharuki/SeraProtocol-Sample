@@ -97,10 +97,10 @@ export class OrderService {
       spendDecimals,
     );
 
-    const entry = Object.entries(balances).find(
-      ([k]) => k.toLowerCase() === spendSymbol.toLowerCase(),
-    )?.[1];
-    const availableRaw = BigInt(entry?.vault_available ?? "0");
+    const row = balances.find(
+      (b) => b.symbol.toLowerCase() === spendSymbol.toLowerCase(),
+    );
+    const availableRaw = BigInt(row?.vault_available ?? "0");
     if (availableRaw >= neededRaw) return { ok: true };
     return {
       ok: false,
