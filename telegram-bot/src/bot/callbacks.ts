@@ -66,6 +66,7 @@ actionsComposer.callbackQuery(/^act:c:(.+)$/, async (ctx) => {
       }
     } else if (kind === "deposit") {
       const payload = result.payload as DepositActionPayload;
+      await ctx.reply(ctx.t("depositExecuting"));
       const res = await ctx.services.deposits.executeDeposit(user, payload);
       await ctx.reply(ctx.t("depositSubmitted", res.txUrl), {
         parse_mode: "HTML",

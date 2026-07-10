@@ -211,8 +211,10 @@ export const en = {
     "❌ You have no ETH for gas. Send a small amount of ETH to your wallet address first (on Sepolia, use a faucet).",
   depositConfirmCard: (amount: string, symbol: string, networkLabel: string) =>
     `<b>🔎 Please review your deposit</b>\n\nDeposit: <b>${amount} ${symbol}</b> → Sera vault\n🌐 ${networkLabel}\n\n⛽ Gas is paid in ETH from your wallet.`,
+  depositExecuting:
+    "⏳ Depositing… Two transactions (approve + deposit) each need to be mined, so this takes about 1–2 minutes.",
   depositSubmitted: (txUrl: string) =>
-    `📤 Deposit submitted! <a href="${txUrl}">Track the transaction</a>\n\nIt appears in your vault after on-chain confirmation (usually under a minute).`,
+    `✅ Deposit confirmed on-chain! <a href="${txUrl}">View the transaction</a>\n\nYour vault balance is updated — check it with /balance.`,
 
   // ---- /network ----
   networkCurrent: (label: string) => `🌐 Current network: <b>${label}</b>`,

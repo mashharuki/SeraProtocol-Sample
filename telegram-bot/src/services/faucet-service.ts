@@ -5,6 +5,7 @@ import type { UserRow } from "../db/repositories";
 import type { PrivySigner } from "../privy/signer";
 import type { AccountService } from "./account-service";
 import type { PendingActionService } from "./pending-actions";
+import { makeWaitForTx, type WaitForTx } from "./tx-wait";
 
 /**
  * Sera Sepolia test-token faucet. Contract + ABI recovered from the
@@ -33,6 +34,7 @@ export class FaucetService {
     private accountService: AccountService,
     private pendingActions: PendingActionService,
     private signer: PrivySigner,
+    private waitForTx: WaitForTx = makeWaitForTx(config),
   ) {}
 
   private client() {
@@ -98,10 +100,7 @@ export class FaucetService {
     const txHash = await client.sendRawTransaction({
       serializedTransaction: signed as `0x${string}`,
     });
-    const receipt = await client.waitForTransactionReceipt({ hash: txHash });
-    if (receipt.status !== "success") {
-      throw new Error(`Faucet claim tx reverted: ${txHash}`);
-    }
+    await this.waitForTx("sepolia", txHash);
     const explorer = this.config.networks.sepolia.explorerBaseUrl;
     return { txHash, txUrl: `${explorer}/tx/${txHash}` };
   }

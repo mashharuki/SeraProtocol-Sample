@@ -6,6 +6,7 @@ import { toRawUnits, validateAmount } from "../sera/precision";
 import type { AccountService } from "./account-service";
 import type { PendingActionService } from "./pending-actions";
 import type { RateService } from "./rate-service";
+import { makeWaitForTx, type WaitForTx } from "./tx-wait";
 
 export interface DepositActionPayload {
   tokenSymbol: string;
@@ -36,6 +37,7 @@ export class DepositService {
     private pendingActions: PendingActionService,
     private signer: PrivySigner,
     private authedSera: (user: UserRow) => Promise<SeraClient>,
+    private waitForTx: WaitForTx = makeWaitForTx(config),
   ) {}
 
   async prepareDeposit(
@@ -98,7 +100,11 @@ export class DepositService {
       user.walletId,
       normalizeTxForPrivy(approveTx),
     );
-    await sera.sendTx(signedApprove);
+    const approveHash = await sera.sendTx(signedApprove);
+    // The /deposit builder checks the on-chain allowance and returns
+    // 400 "Invalid request" while the approve is still in the mempool
+    // (observed live 2026-07-10) — wait until it is mined.
+    await this.waitForTx(user.network, approveHash);
 
     const depositTx = await sera.buildDeposit({
       token: payload.tokenAddress,
@@ -110,6 +116,8 @@ export class DepositService {
       normalizeTxForPrivy(depositTx),
     );
     const txHash = await sera.sendTx(signedDeposit);
+    // Success reported to the user means mined + not reverted.
+    await this.waitForTx(user.network, txHash);
 
     const explorer = this.config.networks[user.network].explorerBaseUrl;
     return { txHash, txUrl: `${explorer}/tx/${txHash}` };

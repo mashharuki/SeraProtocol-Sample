@@ -189,8 +189,10 @@ export const ja: MessageCatalog = {
     "❌ ガス代用の ETH がありません。まずウォレットアドレスに少額の ETH を送ってください（Sepolia の場合は faucet を利用）。",
   depositConfirmCard: (amount: string, symbol: string, networkLabel: string) =>
     `<b>🔎 入金内容の確認</b>\n\n入金: <b>${amount} ${symbol}</b> → Sera ボールト\n🌐 ${networkLabel}\n\n⛽ ガス代はウォレットの ETH から支払われます。`,
+  depositExecuting:
+    "⏳ 入金処理中… approve と入金の2つのトランザクションのマイニングを待つため、1〜2分ほどかかります。",
   depositSubmitted: (txUrl: string) =>
-    `📤 入金を送信しました！ <a href="${txUrl}">トランザクションを確認</a>\n\nオンチェーンで承認され次第（通常1分以内）ボールトに反映されます。`,
+    `✅ 入金がオンチェーンで確定しました！ <a href="${txUrl}">トランザクションを確認</a>\n\nボールト残高に反映済みです。/balance で確認できます。`,
 
   // ---- /network ----
   networkCurrent: (label: string) => `🌐 現在のネットワーク: <b>${label}</b>`,
