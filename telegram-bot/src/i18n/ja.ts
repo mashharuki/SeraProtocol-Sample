@@ -102,8 +102,12 @@ export const ja: MessageCatalog = {
   // ---- /swap ----
   swapPickFrom: "💱 <b>支払いに使う</b>トークンはどれですか？",
   swapPickTo: "<b>受け取りたい</b>トークンはどれですか？",
-  swapEnterAmount: (from: string, to: string) =>
-    `<b>${from}</b> をいくら <b>${to}</b> に両替しますか？\n\n数字を入力してください（例: <code>100</code>）。`,
+  swapEnterAmount: (from: string, to: string, min: string | null) =>
+    `<b>${from}</b> をいくら <b>${to}</b> に両替しますか？\n\n数字を入力してください（例: <code>100</code>）。${
+      min ? `\n📏 最小取引額: <b>${min} ${from}</b>` : ""
+    }`,
+  swapBelowMin: (min: string, symbol: string) =>
+    `⚠️ 最小取引額を下回っています。<b>${min} ${symbol}</b> 以上を入力してください。`,
   swapInvalidAmount: (hint: string) =>
     `金額として認識できませんでした。${hint}\n<code>100</code> や <code>25.5</code> のような数字を入力してください。`,
   swapQuoting: "最良価格を取得しています… ⏳",
@@ -140,12 +144,22 @@ export const ja: MessageCatalog = {
   orderPickPair: "📊 指値注文を出すマーケットを選んでください:",
   orderPickSide: (base: string, quote: string) =>
     `${base} を<b>買い</b>ますか、<b>売り</b>ますか？（価格は ${quote} 建て）\n\n💡 <i>指値注文は、市場価格があなたの指定価格に達するまで注文板で待機します。約定は後になるか、成立しない場合もあります。</i>`,
+  orderSideLimited: (side: "bid" | "ask", base: string) =>
+    side === "ask"
+      ? `⚠️ このペアでは現在 <b>${base} の売り</b>のみ受け付けています。`
+      : `⚠️ このペアでは現在 <b>${base} の買い</b>のみ受け付けています。`,
+  orderPairUnavailable: (market: string) =>
+    `⚠️ <b>${market}</b> は現在新規注文を受け付けていません。別のマーケットをお試しください。`,
   orderBuyButton: (base: string) => `📈 ${base} を買う`,
   orderSellButton: (base: string) => `📉 ${base} を売る`,
   orderEnterPrice: (quote: string, maxDecimals: number) =>
     `<b>価格</b>（${quote} 建て）を入力してください。小数点以下は最大 ${maxDecimals} 桁です。\n\n例: <code>1.0850</code>`,
-  orderEnterAmount: (base: string, maxDecimals: number) =>
-    `<b>${base}</b> の数量を入力してください。小数点以下は最大 ${maxDecimals} 桁です。`,
+  orderEnterAmount: (base: string, maxDecimals: number, min: string | null) =>
+    `<b>${base}</b> の数量を入力してください。小数点以下は最大 ${maxDecimals} 桁です。${
+      min ? `\n📏 この注文の最小数量: <b>${min} ${base}</b>` : ""
+    }`,
+  orderBelowMin: (min: string, base: string) =>
+    `⚠️ このペアの最小数量を下回っています。<b>${min} ${base}</b> 以上を入力してください。`,
   orderInvalidNumber: (maxDecimals: number) =>
     `小数点以下 ${maxDecimals} 桁以内の有効な数字を入力してください。`,
   orderVaultShort: (needed: string, available: string, symbol: string) =>

@@ -103,8 +103,21 @@ rateComposer.callbackQuery(
       fromSymbol: quoteSymbol,
       toSymbol: baseSymbol,
     };
-    await ctx.reply(ctx.t("swapEnterAmount", quoteSymbol, baseSymbol), {
-      parse_mode: "HTML",
-    });
+    const fromToken = await ctx.services.rates.findToken(
+      ctx.user.network,
+      quoteSymbol,
+    );
+    const min = Number(fromToken?.min_trade_amount);
+    await ctx.reply(
+      ctx.t(
+        "swapEnterAmount",
+        quoteSymbol,
+        baseSymbol,
+        Number.isFinite(min) && min > 0
+          ? String(fromToken?.min_trade_amount)
+          : null,
+      ),
+      { parse_mode: "HTML" },
+    );
   },
 );

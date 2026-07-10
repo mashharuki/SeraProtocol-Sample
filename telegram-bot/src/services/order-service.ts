@@ -73,6 +73,43 @@ export class OrderService {
   }
 
   /**
+   * Is this (market, side) accepting orders right now? PAIR_INACTIVE is
+   * checked by /orders/preview before any amount validation (verified live
+   * 2026-07-10: all 28 major asks OK, all 28 bids PAIR_INACTIVE), so a
+   * dummy preview with a throwaway owner is a reliable, side-effect-free
+   * probe. Any response other than PAIR_INACTIVE counts as active.
+   */
+  async checkSideActive(
+    network: Network,
+    market: SeraMarket,
+    side: "bid" | "ask",
+  ): Promise<boolean> {
+    const sera = this.publicSera(network);
+    const orderId = crypto.randomUUID();
+    try {
+      await sera.previewOrder({
+        owner_address: "0x1111111111111111111111111111111111111111",
+        side,
+        amount: "1",
+        price: "1",
+        order_type: "limit",
+        from_address:
+          side === "bid" ? market.quote_address : market.base_address,
+        to_address: side === "bid" ? market.base_address : market.quote_address,
+        order_id: orderId,
+        uuid_int: encodeUuidInt(orderId).toString(),
+        expiration: (await sera.getSystemTime()) + 3600,
+      });
+      return true;
+    } catch (err) {
+      if (err instanceof SeraApiError && err.errorCode === "PAIR_INACTIVE") {
+        return false;
+      }
+      return true; // amount/precision errors etc. mean the pair is live
+    }
+  }
+
+  /**
    * Bids lock quote-token (price×amount), asks lock base-token (amount) —
    * both from vault_available. Returns what's missing for the UX prompt.
    */

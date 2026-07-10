@@ -56,8 +56,19 @@ swapComposer.callbackQuery(/^swap:to:([A-Za-z0-9]+)$/, async (ctx) => {
     await ctx.reply(ctx.t("sendEnterRecipient"), { parse_mode: "HTML" });
   } else {
     draft.step = "enter_amount";
+    const fromToken = draft.fromSymbol
+      ? await ctx.services.rates.findToken(ctx.user.network, draft.fromSymbol)
+      : null;
+    const min = Number(fromToken?.min_trade_amount);
     await ctx.reply(
-      ctx.t("swapEnterAmount", draft.fromSymbol ?? "?", draft.toSymbol),
+      ctx.t(
+        "swapEnterAmount",
+        draft.fromSymbol ?? "?",
+        draft.toSymbol,
+        Number.isFinite(min) && min > 0
+          ? String(fromToken?.min_trade_amount)
+          : null,
+      ),
       { parse_mode: "HTML" },
     );
   }

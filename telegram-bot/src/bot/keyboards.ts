@@ -95,10 +95,13 @@ export function rateKeyboard(markets: SeraMarket[]): InlineKeyboard {
 export function sideKeyboard(
   t: Translator,
   baseSymbol: string,
+  available: { bid: boolean; ask: boolean } = { bid: true, ask: true },
 ): InlineKeyboard {
-  return new InlineKeyboard()
-    .text(t("orderBuyButton", baseSymbol), "order:side:bid")
-    .text(t("orderSellButton", baseSymbol), "order:side:ask");
+  const kb = new InlineKeyboard();
+  if (available.bid) kb.text(t("orderBuyButton", baseSymbol), "order:side:bid");
+  if (available.ask)
+    kb.text(t("orderSellButton", baseSymbol), "order:side:ask");
+  return kb;
 }
 
 export function networkKeyboard(current: Network): InlineKeyboard {

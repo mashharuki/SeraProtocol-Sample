@@ -6,6 +6,42 @@ import { formatEth } from "./format";
 import { confirmKeyboard } from "./keyboards";
 
 /**
+ * Minimum base amount for an order draft: asks use min_ask_amount directly;
+ * bids must reach min_bid_quote_amount in quote terms, so the base minimum
+ * is min_bid_quote_amount / price. Rounded UP to the market's quantity
+ * precision so the displayed minimum always passes the API check.
+ */
+/** Token-level swap minimum (human units), or null when none applies. */
+function swapMin(minTradeAmount: string | number | undefined): string | null {
+  const min = Number(minTradeAmount);
+  return Number.isFinite(min) && min > 0 ? String(minTradeAmount) : null;
+}
+
+export function orderMinBase(draft: {
+  side?: "bid" | "ask";
+  price?: string;
+  minAskAmount?: string;
+  minBidQuoteAmount?: string;
+  quantityPrecision?: number;
+}): string | null {
+  let min: number;
+  if (draft.side === "ask") {
+    min = Number(draft.minAskAmount);
+  } else {
+    const quoteMin = Number(draft.minBidQuoteAmount);
+    const price = Number(draft.price);
+    if (!Number.isFinite(price) || price <= 0) return null;
+    min = quoteMin / price;
+  }
+  if (!Number.isFinite(min) || min <= 0) return null;
+  const factor = 10 ** (draft.quantityPrecision ?? 6);
+  // Subtract a tiny epsilon before ceiling so float noise (8.8/10 =
+  // 0.8800000000000001) doesn't inflate an exact minimum by one step.
+  const rounded = Math.ceil(min * factor - 1e-6) / factor;
+  return rounded.toFixed(draft.quantityPrecision ?? 6).replace(/\.?0+$/, "");
+}
+
+/**
  * Multi-step flow state machine: consumes message:text while a draft is in
  * the session. Returns false when no flow is active (text falls through to
  * the AI agent bridge).
@@ -46,8 +82,16 @@ async function handleSwapText(
     }
     draft.recipient = candidate;
     draft.step = "enter_amount";
+    const fromToken = draft.fromSymbol
+      ? await ctx.services.rates.findToken(user.network, draft.fromSymbol)
+      : null;
     await ctx.reply(
-      ctx.t("swapEnterAmount", draft.fromSymbol ?? "?", draft.toSymbol ?? "?"),
+      ctx.t(
+        "swapEnterAmount",
+        draft.fromSymbol ?? "?",
+        draft.toSymbol ?? "?",
+        swapMin(fromToken?.min_trade_amount),
+      ),
       { parse_mode: "HTML" },
     );
     return true;
@@ -64,6 +108,14 @@ async function handleSwapText(
     if (!check.ok) {
       await ctx.reply(ctx.t("swapInvalidAmount", ""), { parse_mode: "HTML" });
       return true;
+    }
+    const swapMinAmount = swapMin(token?.min_trade_amount);
+    if (swapMinAmount !== null && Number(text) < Number(swapMinAmount)) {
+      await ctx.reply(
+        ctx.t("swapBelowMin", swapMinAmount, draft.fromSymbol ?? "?"),
+        { parse_mode: "HTML" },
+      );
+      return true; // stay in the flow so the user can re-enter the amount
     }
     await ctx.reply(ctx.t("swapQuoting"));
     try {
@@ -126,6 +178,7 @@ async function handleOrderText(
         "orderEnterAmount",
         draft.baseSymbol ?? "?",
         draft.quantityPrecision ?? 6,
+        orderMinBase(draft),
       ),
       { parse_mode: "HTML" },
     );
@@ -143,6 +196,14 @@ async function handleOrderText(
     }
     const amount = text.trim().replace(/,/g, "");
     if (!draft.marketSymbol || !draft.side || !draft.price) return false;
+    const minBase = orderMinBase(draft);
+    if (minBase !== null && Number(amount) < Number(minBase)) {
+      await ctx.reply(
+        ctx.t("orderBelowMin", minBase, draft.baseSymbol ?? "?"),
+        { parse_mode: "HTML" },
+      );
+      return true; // stay in the flow so the user can re-enter the amount
+    }
     try {
       const market = await ctx.services.orders.getMarket(
         user.network,

@@ -124,8 +124,12 @@ export const en = {
   // ---- /swap ----
   swapPickFrom: "💱 Which token do you want to <b>pay with</b>?",
   swapPickTo: "Which token do you want to <b>receive</b>?",
-  swapEnterAmount: (from: string, to: string) =>
-    `How much <b>${from}</b> do you want to exchange into <b>${to}</b>?\n\nJust type a number (e.g. <code>100</code>).`,
+  swapEnterAmount: (from: string, to: string, min: string | null) =>
+    `How much <b>${from}</b> do you want to exchange into <b>${to}</b>?\n\nJust type a number (e.g. <code>100</code>).${
+      min ? `\n📏 Minimum: <b>${min} ${from}</b>` : ""
+    }`,
+  swapBelowMin: (min: string, symbol: string) =>
+    `⚠️ That's below the minimum trade size. Please enter at least <b>${min} ${symbol}</b>.`,
   swapInvalidAmount: (hint: string) =>
     `That doesn't look like a valid amount. ${hint}\nPlease type a plain number like <code>100</code> or <code>25.5</code>.`,
   swapQuoting: "Getting you the best price… ⏳",
@@ -163,12 +167,22 @@ export const en = {
   orderPickPair: "📊 Choose a market for your limit order:",
   orderPickSide: (base: string, quote: string) =>
     `Do you want to <b>buy</b> or <b>sell</b> ${base} (priced in ${quote})?\n\n💡 <i>A limit order waits on the order book until the market reaches your price — it may fill later or not at all.</i>`,
+  orderSideLimited: (side: "bid" | "ask", base: string) =>
+    side === "ask"
+      ? `⚠️ Only <b>selling ${base}</b> is currently enabled for this pair.`
+      : `⚠️ Only <b>buying ${base}</b> is currently enabled for this pair.`,
+  orderPairUnavailable: (market: string) =>
+    `⚠️ <b>${market}</b> is temporarily not accepting new orders. Please try another market.`,
   orderBuyButton: (base: string) => `📈 Buy ${base}`,
   orderSellButton: (base: string) => `📉 Sell ${base}`,
   orderEnterPrice: (quote: string, maxDecimals: number) =>
     `At what <b>price</b> (in ${quote})? Max ${maxDecimals} decimal places.\n\nType a number, e.g. <code>1.0850</code>.`,
-  orderEnterAmount: (base: string, maxDecimals: number) =>
-    `How much <b>${base}</b>? Max ${maxDecimals} decimal places.`,
+  orderEnterAmount: (base: string, maxDecimals: number, min: string | null) =>
+    `How much <b>${base}</b>? Max ${maxDecimals} decimal places.${
+      min ? `\n📏 Minimum for this order: <b>${min} ${base}</b>` : ""
+    }`,
+  orderBelowMin: (min: string, base: string) =>
+    `⚠️ That's below the minimum size for this pair. Please enter at least <b>${min} ${base}</b>.`,
   orderInvalidNumber: (maxDecimals: number) =>
     `Please enter a valid number with at most ${maxDecimals} decimal places.`,
   orderVaultShort: (needed: string, available: string, symbol: string) =>

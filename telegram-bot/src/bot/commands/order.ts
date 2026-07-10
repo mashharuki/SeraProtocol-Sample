@@ -41,12 +41,42 @@ orderComposer.callbackQuery(/^order:mkt:(.+)$/, async (ctx) => {
   draft.quoteSymbol = market.quote_symbol;
   draft.tickPrecision = market.tick_precision;
   draft.quantityPrecision = market.quantity_precision;
+  draft.minAskAmount =
+    market.min_ask_amount !== undefined
+      ? String(market.min_ask_amount)
+      : undefined;
+  draft.minBidQuoteAmount =
+    market.min_bid_quote_amount !== undefined
+      ? String(market.min_bid_quote_amount)
+      : undefined;
+
+  // Sides can be disabled server-side (on Sepolia all bids are currently
+  // PAIR_INACTIVE) — probe both before offering buttons that dead-end.
+  const [bidActive, askActive] = await Promise.all([
+    ctx.services.orders.checkSideActive(ctx.user.network, market, "bid"),
+    ctx.services.orders.checkSideActive(ctx.user.network, market, "ask"),
+  ]);
+  if (!bidActive && !askActive) {
+    ctx.session.flow = undefined;
+    await ctx.reply(ctx.t("orderPairUnavailable", market.symbol), {
+      parse_mode: "HTML",
+    });
+    return;
+  }
+
   draft.step = "pick_side";
+  const note =
+    bidActive && askActive
+      ? ""
+      : `\n\n${ctx.t("orderSideLimited", bidActive ? "bid" : "ask", market.base_symbol)}`;
   await ctx.reply(
-    ctx.t("orderPickSide", market.base_symbol, market.quote_symbol),
+    ctx.t("orderPickSide", market.base_symbol, market.quote_symbol) + note,
     {
       parse_mode: "HTML",
-      reply_markup: sideKeyboard(ctx.t, market.base_symbol),
+      reply_markup: sideKeyboard(ctx.t, market.base_symbol, {
+        bid: bidActive,
+        ask: askActive,
+      }),
     },
   );
 });

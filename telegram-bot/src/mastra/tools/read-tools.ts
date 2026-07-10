@@ -61,6 +61,8 @@ export const listMarketsTool = createTool({
         quote: z.string(),
         tickPrecision: z.number(),
         quantityPrecision: z.number(),
+        minAskAmount: z.string().nullable(),
+        minBidQuoteAmount: z.string().nullable(),
       }),
     ),
   }),
@@ -80,6 +82,12 @@ export const listMarketsTool = createTool({
         quote: m.quote_symbol,
         tickPrecision: m.tick_precision,
         quantityPrecision: m.quantity_precision,
+        minAskAmount:
+          m.min_ask_amount !== undefined ? String(m.min_ask_amount) : null,
+        minBidQuoteAmount:
+          m.min_bid_quote_amount !== undefined
+            ? String(m.min_bid_quote_amount)
+            : null,
       })),
     };
   },

@@ -23,6 +23,9 @@ export interface OrderDraft {
   quoteSymbol?: string;
   tickPrecision?: number;
   quantityPrecision?: number;
+  /** Market minimums (human units) for pre-submit checks and prompts. */
+  minAskAmount?: string;
+  minBidQuoteAmount?: string;
 }
 
 export interface DepositDraft {
