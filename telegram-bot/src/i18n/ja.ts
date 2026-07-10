@@ -91,6 +91,14 @@ export const ja: MessageCatalog = {
   rateUnavailable: "このレートは現在取得できません。別のペアをお試しください。",
   tradePairButton: "💱 このペアで取引",
 
+  // ---- /liquidity ----
+  liquidityChecking:
+    "💧 主要ペアのスワップ流動性を確認しています…（数秒かかります）",
+  liquidityResult: (networkLabel: string, lines: string, checked: number) =>
+    `💧 <b>いまスワップ可能なペア</b>（${networkLabel}）\n\n${lines}\n\n${checked} 方向を確認しました。表示のないペアは流動性がありません — /deposit → /order で指値を板に置けば、自分でそのペアの流動性を作れます。`,
+  liquidityNone: (networkLabel: string, checked: number) =>
+    `💧 現在 ${networkLabel} でスワップ可能な主要ペアはありません（${checked} 方向を確認）。\n\n流動性は自分で作れます: /deposit でボールトに入金し、/order で指値注文を板に置くと、そのペアがスワップ可能になります。`,
+
   // ---- /swap ----
   swapPickFrom: "💱 <b>支払いに使う</b>トークンはどれですか？",
   swapPickTo: "<b>受け取りたい</b>トークンはどれですか？",
@@ -241,7 +249,7 @@ export const ja: MessageCatalog = {
   errSlippage:
     "相場が変動し、指定価格での約定ができなくなりました。もう一度お試しください。",
   errNoLiquidity:
-    "現在このペア/金額に十分な流動性がありません。金額を減らすか、別のペアをお試しください。",
+    "現在このペア/金額に十分な流動性がありません。/liquidity でいまスワップ可能なペアを確認するか、金額を減らしてお試しください。",
   errAmountBelowMin: "金額がこのペアの最小取引額を下回っています。",
   errInvalidPrecision:
     "金額または価格の小数点以下の桁数がこのマーケットの上限を超えています。",

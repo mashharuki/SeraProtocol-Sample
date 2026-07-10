@@ -19,6 +19,7 @@ trade, English/Japanese, Mainnet + Sepolia.
 | `/start` | 言語選択 → Privy ウォレット自動作成 → Sera API キー発行 |
 | `/wallet` `/balance` | アドレス表示、ETH + ステーブルコイン残高（ウォレット/ボールト別） |
 | `/rate` | ライブ為替レート（Sera `/fx/rate`） |
+| `/liquidity` | いまスワップ可能な主要ペアを実測表示（`/swap/quote` を並列プローブ） |
 | `/swap` | 即時両替 — ガス代込み quote（`gas_mode: receive_less`）なので **ETH 不要** |
 | `/send` | 国際送金 — 両替して別通貨のまま第三者アドレスへ届ける |
 | `/order` `/orders` | 板への指値注文・状況確認・キャンセル（5分クールダウン対応） |

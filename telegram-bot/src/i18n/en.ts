@@ -113,6 +113,14 @@ export const en = {
   rateUnavailable: "This rate is unavailable right now. Try another pair.",
   tradePairButton: "💱 Trade this pair",
 
+  // ---- /liquidity ----
+  liquidityChecking:
+    "💧 Checking live swap liquidity across major pairs… (takes a few seconds)",
+  liquidityResult: (networkLabel: string, lines: string, checked: number) =>
+    `💧 <b>Swappable right now</b> (${networkLabel})\n\n${lines}\n\nChecked ${checked} pair directions. Pairs not listed have no liquidity — you can create some yourself by placing a limit order: /deposit → /order.`,
+  liquidityNone: (networkLabel: string, checked: number) =>
+    `💧 No major pair is swappable on ${networkLabel} right now (checked ${checked} directions).\n\nYou can create liquidity yourself: /deposit tokens into the vault, then place a limit order with /order — once it rests on the book, that pair becomes swappable.`,
+
   // ---- /swap ----
   swapPickFrom: "💱 Which token do you want to <b>pay with</b>?",
   swapPickTo: "Which token do you want to <b>receive</b>?",
@@ -262,7 +270,7 @@ export const en = {
   errSlippage:
     "The market moved and your price can no longer be met. Try again.",
   errNoLiquidity:
-    "There's currently not enough liquidity for this pair/amount. Try a smaller amount or another pair.",
+    "There's currently not enough liquidity for this pair/amount. Check /liquidity to see which pairs are swappable right now, or try a smaller amount.",
   errAmountBelowMin:
     "The amount is below the minimum trade size for this pair.",
   errInvalidPrecision:

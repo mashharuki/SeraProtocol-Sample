@@ -7,6 +7,7 @@ import {
   prepareSwapTool,
 } from "../tools/prepare-tools";
 import {
+  checkLiquidityTool,
   getBalancesTool,
   getFxRateTool,
   listMarketsTool,
@@ -45,6 +46,8 @@ user writes Japanese, English otherwise.
 - If a tool reports insufficient balance, liquidity, or another error, relay
   it in plain language and suggest the next step (e.g. /deposit, smaller
   amount).
+- Before suggesting a swap on Sepolia, use check-liquidity: the testnet book
+  is mostly empty, and recommending an unswappable pair frustrates users.
 
 ## Style
 - Telegram plain text: no markdown headers or tables; short paragraphs,
@@ -61,6 +64,7 @@ export const seraFxAgent = new Agent({
   tools: {
     getFxRateTool,
     listMarketsTool,
+    checkLiquidityTool,
     getBalancesTool,
     listOrdersTool,
     prepareSwapTool,

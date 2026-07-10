@@ -3,6 +3,22 @@ import { z } from "zod";
 export type Network = "mainnet" | "sepolia";
 export type Language = "en" | "ja";
 
+/**
+ * Major stablecoins the UX focuses on: market/rate keyboards and the
+ * /liquidity probe are limited to these (the full registry has 100+ tokens
+ * and 6786 markets — far past Telegram's keyboard limits).
+ */
+export const MAJOR_SYMBOLS: ReadonlySet<string> = new Set([
+  "USDC",
+  "EURC",
+  "JPYC",
+  "EURT",
+  "XSGD",
+  "GYEN",
+  "USDT",
+  "XIDR",
+]);
+
 export interface NetworkConfig {
   /** Sera REST API v2 base URL, e.g. https://api.sera.cx/api/v1 */
   seraBaseUrl: string;

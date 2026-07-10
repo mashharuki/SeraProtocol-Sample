@@ -18,6 +18,32 @@ rateComposer.command("rate", async (ctx) => {
   }
 });
 
+// Live liquidity check: probe /swap/quote across major pairs so users can
+// see what is actually swappable before trying (Sepolia is mostly dry).
+rateComposer.command("liquidity", async (ctx) => {
+  const network = ctx.user?.network ?? ctx.services.config.defaultNetwork;
+  await ctx.reply(ctx.t("liquidityChecking"));
+  try {
+    const probe = await ctx.services.rates.probeLiquidity(network);
+    const net = ctx.services.config.networks[network];
+    if (probe.pairs.length === 0) {
+      await ctx.reply(ctx.t("liquidityNone", net.label, probe.checked), {
+        parse_mode: "HTML",
+      });
+      return;
+    }
+    const lines = probe.pairs
+      .map(([from, to]) => `✅ ${from} → ${to}`)
+      .join("\n");
+    await ctx.reply(ctx.t("liquidityResult", net.label, lines, probe.checked), {
+      parse_mode: "HTML",
+    });
+  } catch (err) {
+    console.error("/liquidity failed:", err);
+    await ctx.reply(ctx.t("errorGeneric"));
+  }
+});
+
 rateComposer.callbackQuery(
   /^rate:([A-Za-z0-9]+):([A-Za-z0-9]+)$/,
   async (ctx) => {

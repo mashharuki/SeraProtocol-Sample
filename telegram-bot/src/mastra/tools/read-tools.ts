@@ -85,6 +85,35 @@ export const listMarketsTool = createTool({
   },
 });
 
+export const checkLiquidityTool = createTool({
+  id: "check-liquidity",
+  description:
+    "Check which major stablecoin pairs currently have live swap liquidity on the user's network. Use this before suggesting a swap, or when a swap fails with a liquidity error.",
+  inputSchema: z.object({}),
+  outputSchema: z.object({
+    result: z.string(),
+  }),
+  execute: async (_input, context) => {
+    const services = getServices();
+    const identity = getIdentity(context?.requestContext);
+    const network = identity
+      ? ((await services.users.find(identity.telegramUserId))?.network ??
+        services.config.defaultNetwork)
+      : services.config.defaultNetwork;
+    const probe = await services.rates.probeLiquidity(network);
+    if (probe.pairs.length === 0) {
+      return {
+        result: `No major pair is swappable on ${network} right now (checked ${probe.checked} directions). Liquidity can be created by depositing to the vault and placing a limit order.`,
+      };
+    }
+    return {
+      result: `Swappable now on ${network} (checked ${probe.checked} directions):\n${probe.pairs
+        .map(([from, to]) => `${from} -> ${to}`)
+        .join("\n")}`,
+    };
+  },
+});
+
 export const getBalancesTool = createTool({
   id: "get-balances",
   description:

@@ -1,5 +1,5 @@
 import { InlineKeyboard } from "grammy";
-import type { Network } from "../config";
+import { MAJOR_SYMBOLS, type Network } from "../config";
 import type { Translator } from "../i18n/messages";
 import type { SeraMarket, SeraToken } from "../sera/types";
 
@@ -55,16 +55,6 @@ export function tokenKeyboard(
  * keyboards past ~100 buttons, so market pickers show only major-stablecoin
  * pairs with a hard cap. Other markets stay reachable via the AI chat.
  */
-const MAJOR_SYMBOLS = new Set([
-  "USDC",
-  "EURC",
-  "JPYC",
-  "EURT",
-  "XSGD",
-  "GYEN",
-  "USDT",
-  "XIDR",
-]);
 const MAX_MARKET_BUTTONS = 40;
 
 export function pickDisplayMarkets(markets: SeraMarket[]): SeraMarket[] {
