@@ -8,6 +8,10 @@ An on-chain stablecoin-FX Telegram bot built on Sera Protocol. Beginner-friendly
 seedless onboarding via Privy server wallets, guided confirmation cards for every
 trade, English/Japanese, Mainnet + Sepolia.
 
+## Demo Video
+
+[![demo]()](https://youtu.be/qF3D--eui8o)
+
 ## Features
 
 | Command | What it does |
@@ -147,11 +151,14 @@ GCP_PROJECT_ID=my-project REGION=us-central1 SERVICE_NAME=my-bot ./scripts/deplo
 
 ## Known limitations / TODO
 
-- **ManageApiKey / CancelOrder の EIP-712 struct レイアウトは API リファレンスからの推定**
-  — 初回 E2E で `POST /verify-signature` を使って検証すること（`src/services/user-service.ts`, `order-service.ts` の NOTE 参照）
+- **CancelOrder の EIP-712 struct レイアウトは API リファレンスからの推定**（ManageApiKey は live 検証済み）
+  — 実注文が存在する状態での初回キャンセル時に検証すること（`src/services/order-service.ts` の NOTE 参照）
 - 同一通貨送金（例: USDC → USDC）は未対応（「準備中」表示）
 - Sera API secret は平文で DB 保存（read/tx-builder 権限のみ）。AES-GCM 暗号化は fast-follow
-- Sepolia は流動性が薄く `NO_LIQUIDITY` が出やすい — 少額で試すこと
+- **Sepolia の swap 流動性はほぼゼロ**（2026-07 時点で主要ペアは XIDR→USDT のみ成立）。
+  `NO_LIQUIDITY` は正しい応答。指値注文は全主要ペアで可能なので、
+  `/faucet` → `/deposit` → `/order` の順で試すのが推奨ルート（自分の指値が将来の swap 流動性になる）
+- `/order` `/rate` のペア選択は主要ステーブルコインペアのみ表示（Telegram のボタン数上限のため。全 6786 マーケットは AI チャット経由で利用可能）
 
 ## Example Wallet 
 

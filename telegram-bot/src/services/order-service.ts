@@ -181,14 +181,37 @@ export class OrderService {
     user: UserRow,
     payload: OrderActionPayload,
   ): Promise<{ orderId: string }> {
-    const signature = await this.signer.signTypedData(
-      user.walletId,
-      payload.previewTypedData as unknown as SeraTypedDataPayload,
-    );
+    // The preview response carries only the message (eip712_order) and types
+    // (eip712_types); the domain comes from GET /config. Both are signed
+    // verbatim — never rebuilt client-side. Shape verified live 2026-07-10.
+    const preview = payload.previewTypedData as {
+      eip712_order?: Record<string, unknown>;
+      eip712_types?: Record<string, unknown>;
+      normalized_amount?: string;
+      normalized_price?: string;
+    };
+    if (!preview.eip712_order || !preview.eip712_types) {
+      throw new Error("Preview response missing eip712_order/eip712_types");
+    }
     const sera = this.publicSera(user.network);
-    // Retries reuse the same order_id — the server dedupes.
+    const config = await sera.getConfig();
+    const signature = await this.signer.signTypedData(user.walletId, {
+      domain: config.eip712_domain as unknown as Record<string, unknown>,
+      types: preview.eip712_types,
+      primaryType: "Order",
+      message: preview.eip712_order,
+    } satisfies SeraTypedDataPayload);
+    // Retries reuse the same order_id — the server dedupes. The server also
+    // requires the canonicalized amount/price echoed from the preview
+    // (raw input like "8.800000" is rejected with INVALID_DECIMAL_FORMAT).
     const res = await sera.submitOrder({
       ...(payload.submitBody as unknown as OrderPreviewRequest),
+      ...(preview.normalized_amount !== undefined && {
+        amount: preview.normalized_amount,
+      }),
+      ...(preview.normalized_price !== undefined && {
+        price: preview.normalized_price,
+      }),
       signature,
     });
     await this.orders.save({

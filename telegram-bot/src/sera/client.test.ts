@@ -5,14 +5,14 @@ function stubFetch(
   handler: (
     url: string,
     init?: RequestInit,
-  ) => { status: number; body: unknown },
+  ) => { status: number; body: unknown; headers?: Record<string, string> },
 ): typeof fetch {
   return (async (input: URL | RequestInfo, init?: RequestInit) => {
     const url = String(input);
     const res = handler(url, init);
     return new Response(JSON.stringify(res.body), {
       status: res.status,
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", ...res.headers },
     });
   }) as typeof fetch;
 }
@@ -63,6 +63,54 @@ describe("SeraClient.getBalances", () => {
     expect(seenUrl).toContain(
       "owner_address=0xabcdef1111111111111111111111111111111111",
     );
+  });
+});
+
+describe("SeraClient 429 handling", () => {
+  // Live-measured 2026-07-10: write endpoints (/tx/send, /approve) are
+  // limited to 2 req/s and return 429 {"detail":"Rate limit exceeded"}
+  // with a retry-after header. The client must honor it and retry.
+  test("retries after 429 honoring retry-after and then succeeds", async () => {
+    let attempts = 0;
+    const client = new SeraClient({
+      baseUrl: "https://sera.test/api/v1",
+      apiKey: { key: "k", secret: "s" },
+      fetchImpl: stubFetch(() => {
+        attempts++;
+        if (attempts <= 2) {
+          return {
+            status: 429,
+            body: { detail: "Rate limit exceeded" },
+            headers: { "retry-after": "0" },
+          };
+        }
+        return { status: 200, body: { tx_hash: "0xhash" } };
+      }),
+    });
+    const hash = await client.sendTx("0xsigned");
+    expect(hash).toBe("0xhash");
+    expect(attempts).toBe(3);
+  });
+
+  test("gives up after retries and surfaces the 429", async () => {
+    let attempts = 0;
+    const client = new SeraClient({
+      baseUrl: "https://sera.test/api/v1",
+      apiKey: { key: "k", secret: "s" },
+      fetchImpl: stubFetch(() => {
+        attempts++;
+        return {
+          status: 429,
+          body: { detail: "Rate limit exceeded" },
+          headers: { "retry-after": "0" },
+        };
+      }),
+    });
+    await expect(client.sendTx("0xsigned")).rejects.toMatchObject({
+      name: "SeraApiError",
+      status: 429,
+    });
+    expect(attempts).toBe(3); // initial + 2 retries
   });
 });
 

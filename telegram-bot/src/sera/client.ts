@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { SeraApiError } from "./errors";
+import { SERA_ERROR_CODES, SeraApiError } from "./errors";
 import {
   apiKeyCreateSchema,
   balancesResponseSchema,
@@ -29,6 +29,36 @@ import {
   txSendResultSchema,
   unsignedTxSchema,
 } from "./types";
+
+/**
+ * Error codes arrive in several live formats:
+ *   {error_code: "QUOTE_STALE", detail: "..."}
+ *   {detail: {success: false, error: "no_liquidity"}}   (nested, lowercase)
+ *   {detail: "PAIR_INACTIVE"}                            (bare code string)
+ *   {detail: "No liquidity"}                             (prose form of a code)
+ * Normalize all of them to the canonical UPPER_SNAKE code. Prose details are
+ * only accepted when they normalize to a known SeraErrorCode, so generic
+ * messages like "Invalid request" stay unmapped.
+ */
+export function extractErrorCode(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const b = body as { error_code?: unknown; detail?: unknown };
+  if (typeof b.error_code === "string") return b.error_code.toUpperCase();
+  if (typeof b.detail === "object" && b.detail !== null) {
+    const d = b.detail as { error_code?: unknown; error?: unknown };
+    if (typeof d.error_code === "string") return d.error_code.toUpperCase();
+    if (typeof d.error === "string") return d.error.toUpperCase();
+  }
+  if (typeof b.detail === "string") {
+    if (/^[A-Z][A-Z_]+$/.test(b.detail)) return b.detail;
+    const normalized = b.detail
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, "_");
+    if (SERA_ERROR_CODES.has(normalized)) return normalized;
+  }
+  return undefined;
+}
 
 export interface SeraClientOptions {
   baseUrl: string;
@@ -89,11 +119,25 @@ export class SeraClient {
       headers.authorization = `Bearer ${this.apiKey.key}:${this.apiKey.secret}`;
     }
 
-    const res = await this.fetchImpl(url, {
-      method: opts.method ?? (opts.body !== undefined ? "POST" : "GET"),
-      headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-    });
+    // Write endpoints are rate-limited to 2 req/s (measured live 2026-07-10;
+    // /tx/send returns 429 "Rate limit exceeded" with retry-after). Honor the
+    // header and retry: builders are read-equivalent and resending the same
+    // signed raw tx is idempotent (same hash), so retrying is always safe.
+    const MAX_RETRIES_429 = 2;
+    let res: Response;
+    for (let attempt = 0; ; attempt++) {
+      res = await this.fetchImpl(url, {
+        method: opts.method ?? (opts.body !== undefined ? "POST" : "GET"),
+        headers,
+        body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      });
+      if (res.status !== 429 || attempt >= MAX_RETRIES_429) break;
+      const retryAfter = Number(res.headers.get("retry-after"));
+      const waitSec = Number.isFinite(retryAfter)
+        ? Math.min(Math.max(retryAfter, 0), 5)
+        : 1;
+      await new Promise((resolve) => setTimeout(resolve, waitSec * 1000 + 100));
+    }
 
     const text = await res.text();
     let json: unknown;
@@ -104,12 +148,11 @@ export class SeraClient {
     }
 
     if (!res.ok) {
-      const errBody = json as { detail?: unknown; error_code?: unknown };
       throw new SeraApiError(
         res.status,
-        typeof errBody.error_code === "string" ? errBody.error_code : undefined,
-        typeof errBody.detail === "string"
-          ? errBody.detail
+        extractErrorCode(json),
+        typeof (json as { detail?: unknown }).detail === "string"
+          ? String((json as { detail: string }).detail)
           : text.slice(0, 300),
         path,
       );

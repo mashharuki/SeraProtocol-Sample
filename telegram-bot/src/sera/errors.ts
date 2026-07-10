@@ -56,6 +56,11 @@ const codeToKey: Record<SeraErrorCode, MessageKey> = {
   TRANSIENT_SETTLEMENT_FAILURE: "errTransient",
 };
 
+/** Runtime set of known codes, for normalizing free-text error details. */
+export const SERA_ERROR_CODES: ReadonlySet<string> = new Set(
+  Object.keys(codeToKey),
+);
+
 /** Map a Sera error to the i18n key of a beginner-friendly explanation. */
 export function toUserMessageKey(err: unknown): MessageKey {
   if (err instanceof SeraApiError) {

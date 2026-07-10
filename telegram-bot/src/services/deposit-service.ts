@@ -119,7 +119,8 @@ export class DepositService {
 /**
  * Sera's tx builders return web3-style camelCase fields; Privy's
  * eth_signTransaction expects snake_case. Map the known fields and pass
- * unknown ones through untouched.
+ * unknown ones through untouched. `type` must become a plain number
+ * (Privy rejects the hex string "0x2" the builder returns).
  */
 export function normalizeTxForPrivy(
   tx: Record<string, unknown>,
@@ -136,6 +137,9 @@ export function normalizeTxForPrivy(
   for (const [k, v] of Object.entries(tx)) {
     if (v === undefined || v === null) continue;
     out[renames[k] ?? k] = v;
+  }
+  if (typeof out.type === "string") {
+    out.type = Number(out.type); // "0x2" -> 2
   }
   return out;
 }

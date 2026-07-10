@@ -50,13 +50,39 @@ export function tokenKeyboard(
   return kb;
 }
 
+/**
+ * /markets lists every registry pair (6786 on Sepolia) but Telegram rejects
+ * keyboards past ~100 buttons, so market pickers show only major-stablecoin
+ * pairs with a hard cap. Other markets stay reachable via the AI chat.
+ */
+const MAJOR_SYMBOLS = new Set([
+  "USDC",
+  "EURC",
+  "JPYC",
+  "EURT",
+  "XSGD",
+  "GYEN",
+  "USDT",
+  "XIDR",
+]);
+const MAX_MARKET_BUTTONS = 40;
+
+export function pickDisplayMarkets(markets: SeraMarket[]): SeraMarket[] {
+  const majors = markets.filter(
+    (m) =>
+      MAJOR_SYMBOLS.has(m.base_symbol) && MAJOR_SYMBOLS.has(m.quote_symbol),
+  );
+  const pool = majors.length > 0 ? majors : markets;
+  return pool.slice(0, MAX_MARKET_BUTTONS);
+}
+
 export function marketKeyboard(
   markets: SeraMarket[],
   prefix: string,
 ): InlineKeyboard {
   const kb = new InlineKeyboard();
   let inRow = 0;
-  for (const market of markets) {
+  for (const market of pickDisplayMarkets(markets)) {
     kb.text(market.symbol, `${prefix}:${market.symbol}`);
     if (++inRow % 2 === 0) kb.row();
   }
@@ -66,7 +92,7 @@ export function marketKeyboard(
 export function rateKeyboard(markets: SeraMarket[]): InlineKeyboard {
   const kb = new InlineKeyboard();
   let inRow = 0;
-  for (const market of markets) {
+  for (const market of pickDisplayMarkets(markets)) {
     kb.text(
       `${market.base_symbol}/${market.quote_symbol}`,
       `rate:${market.base_symbol}:${market.quote_symbol}`,
