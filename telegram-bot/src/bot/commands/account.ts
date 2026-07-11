@@ -1,7 +1,8 @@
-import { Composer } from "grammy";
+import { Composer, InputFile } from "grammy";
 import type { MyContext } from "../context";
 import { formatEth } from "../format";
 import { confirmKeyboard } from "../keyboards";
+import { addressQrPng } from "../qr";
 
 export const accountComposer = new Composer<MyContext>();
 
@@ -13,13 +14,20 @@ accountComposer.command("wallet", async (ctx) => {
   }
   const net = ctx.services.config.networks[user.network];
   const explorerUrl = `${net.explorerBaseUrl}/address/${user.walletAddress}`;
-  await ctx.reply(
-    ctx.t("walletInfo", user.walletAddress, net.label, explorerUrl),
-    {
+  const text = ctx.t("walletInfo", user.walletAddress, net.label, explorerUrl);
+  try {
+    const qr = await addressQrPng(user.walletAddress);
+    await ctx.replyWithPhoto(new InputFile(qr, "wallet-qr.png"), {
+      caption: text,
+      parse_mode: "HTML",
+    });
+  } catch (err) {
+    console.error("wallet QR generation failed:", err);
+    await ctx.reply(text, {
       parse_mode: "HTML",
       link_preview_options: { is_disabled: true },
-    },
-  );
+    });
+  }
 });
 
 accountComposer.command("faucet", async (ctx) => {
