@@ -29,7 +29,14 @@ export interface ProvideActionPayload {
 export type ProvidePlan =
   | { status: "ok"; actionId: string; payload: ProvideActionPayload }
   | { status: "vault_short"; available: string; symbol: string }
+  | { status: "budget_low"; minBudget: string; symbol: string }
+  | { status: "no_rates" }
   | { status: "no_markets" };
+
+/** Why a candidate market could not become a leg. */
+type LegSkip =
+  | { skip: "no_rate" }
+  | { skip: "below_min"; requiredBudget: string };
 
 export interface CancelBatchActionPayload {
   vlBatchId: string;
@@ -121,6 +128,7 @@ export class LiquidityService {
 
     const eligible = await this.findEligibleMarkets(user.network, spendSymbol);
     const legs: ProvideLeg[] = [];
+    const skips: LegSkip[] = [];
     for (const { market, side } of eligible) {
       const leg = await this.buildLeg(
         user.network,
@@ -129,9 +137,31 @@ export class LiquidityService {
         spreadBps,
         budgetHuman,
       );
-      if (leg) legs.push(leg);
+      if ("skip" in leg) skips.push(leg);
+      else legs.push(leg);
     }
-    if (legs.length < 2) return { status: "no_markets" }; // VL minimum
+    if (legs.length < 2) {
+      // Prefer the actionable diagnosis: how much budget would unlock a batch?
+      const requirements = skips
+        .filter(
+          (s): s is { skip: "below_min"; requiredBudget: string } =>
+            s.skip === "below_min",
+        )
+        .map((s) => s.requiredBudget)
+        .sort((a, b) => Number(a) - Number(b));
+      const stillNeeded = 2 - legs.length;
+      if (requirements.length >= stillNeeded) {
+        return {
+          status: "budget_low",
+          minBudget: requirements[stillNeeded - 1] as string,
+          symbol: spendSymbol,
+        };
+      }
+      if (skips.some((s) => s.skip === "no_rate")) {
+        return { status: "no_rates" };
+      }
+      return { status: "no_markets" }; // VL minimum is 2 legs
+    }
 
     const payload: ProvideActionPayload = {
       spendSymbol,
@@ -148,14 +178,41 @@ export class LiquidityService {
     return { status: "ok", actionId, payload };
   }
 
-  /** Mid rate × spread → leg price/amount, or null when the market can't be priced. */
+  /**
+   * Cheapest budget that could quote ≥2 markets with `spendSymbol` — pure
+   * market-data math (no probing), used as a hint in the budget prompt.
+   */
+  async minBudgetHint(
+    network: Network,
+    spendSymbol: string,
+  ): Promise<string | null> {
+    const markets = await this.rateService.getMarkets(network);
+    const requirements = markets
+      .filter(
+        (m) =>
+          MAJOR_SYMBOLS.has(m.base_symbol) &&
+          MAJOR_SYMBOLS.has(m.quote_symbol) &&
+          (m.base_symbol === spendSymbol || m.quote_symbol === spendSymbol),
+      )
+      .map((m) =>
+        String(
+          m.base_symbol === spendSymbol
+            ? (m.min_ask_amount ?? "0")
+            : (m.min_bid_quote_amount ?? "0"),
+        ),
+      )
+      .sort((a, b) => Number(a) - Number(b));
+    return requirements.length >= 2 ? (requirements[1] as string) : null;
+  }
+
+  /** Mid rate × spread → leg price/amount, or the reason the market was skipped. */
   private async buildLeg(
     network: Network,
     market: SeraMarket,
     side: "bid" | "ask",
     spreadBps: number,
     budgetHuman: string,
-  ): Promise<ProvideLeg | null> {
+  ): Promise<ProvideLeg | LegSkip> {
     const [baseToken, quoteToken] = await Promise.all([
       this.rateService.findToken(network, market.base_symbol),
       this.rateService.findToken(network, market.quote_symbol),
@@ -169,15 +226,15 @@ export class LiquidityService {
       );
       mid = Number(fx.rate);
     } catch {
-      return null; // no reference rate — skip rather than misprice
+      return { skip: "no_rate" }; // no reference rate — skip rather than misprice
     }
-    if (!Number.isFinite(mid) || mid <= 0) return null;
+    if (!Number.isFinite(mid) || mid <= 0) return { skip: "no_rate" };
 
     // Makers quote away from mid: asks above, bids below.
     const factor =
       side === "ask" ? 1 + spreadBps / 10_000 : 1 - spreadBps / 10_000;
     const price = (mid * factor).toFixed(market.tick_precision);
-    if (Number(price) <= 0) return null;
+    if (Number(price) <= 0) return { skip: "no_rate" };
 
     // Size the leg to the whole budget (spend-token units → base units).
     const budget = Number(budgetHuman);
@@ -185,10 +242,22 @@ export class LiquidityService {
     const amount = baseAmount.toFixed(market.quantity_precision);
 
     // Respect the market minimums or the API will reject the leg.
+    // The budget IS the constrained quantity on both sides (asks spend base,
+    // bids spend quote), so the requirement maps 1:1 to a minimum budget.
     const minAsk = Number(market.min_ask_amount ?? 0);
     const minBidQuote = Number(market.min_bid_quote_amount ?? 0);
-    if (side === "ask" && minAsk > 0 && Number(amount) < minAsk) return null;
-    if (side === "bid" && minBidQuote > 0 && budget < minBidQuote) return null;
+    if (side === "ask" && minAsk > 0 && Number(amount) < minAsk) {
+      return {
+        skip: "below_min",
+        requiredBudget: String(market.min_ask_amount ?? "0"),
+      };
+    }
+    if (side === "bid" && minBidQuote > 0 && budget < minBidQuote) {
+      return {
+        skip: "below_min",
+        requiredBudget: String(market.min_bid_quote_amount ?? "0"),
+      };
+    }
 
     return {
       marketSymbol: market.symbol,

@@ -163,6 +163,84 @@ describe("LiquidityService.executeProvide", () => {
   });
 });
 
+function buildPrepareService(opts: { fxOk: boolean }) {
+  const marketsWithMins = [
+    {
+      ...markets[0],
+      min_ask_amount: "1398.196962",
+      min_bid_quote_amount: "8.800000",
+    },
+    {
+      ...markets[1],
+      min_ask_amount: "1398.196962",
+      min_bid_quote_amount: "7.459813",
+    },
+  ];
+  const rates = {
+    getMarkets: async () => marketsWithMins,
+    findToken: async (_n: string, sym: string) => ({
+      symbol: sym,
+      currency: sym === "JPYC" ? "JPY" : sym === "USDC" ? "USD" : "EUR",
+      decimals: 6,
+    }),
+    getFxRate: async () => {
+      if (!opts.fxOk) throw new Error("503 Service temporarily unavailable");
+      return { rate: "0.0066" };
+    },
+  };
+  const orderService = { checkSideActive: async () => true };
+  const pendingActions = { create: async () => "action-1" };
+  const sera = {
+    getBalances: async () => [
+      { symbol: "JPYC", vault_available: "10000000000", decimals: 6 },
+    ],
+  };
+  return new LiquidityService(
+    rates as never,
+    orderService as never,
+    pendingActions as never,
+    null as never,
+    null as never,
+    (() => sera) as never,
+    (async () => sera) as never,
+  );
+}
+
+describe("LiquidityService.prepareProvide", () => {
+  test("budget below every market minimum → budget_low with the enabling amount", async () => {
+    const service = buildPrepareService({ fxOk: true });
+    const plan = await service.prepareProvide(user, "JPYC", 50, "200");
+    expect(plan).toEqual({
+      status: "budget_low",
+      minBudget: "1398.196962",
+      symbol: "JPYC",
+    });
+  });
+
+  test("FX rate feed down for all legs → no_rates, not no_markets", async () => {
+    const service = buildPrepareService({ fxOk: false });
+    const plan = await service.prepareProvide(user, "JPYC", 50, "2000");
+    expect(plan).toEqual({ status: "no_rates" });
+  });
+
+  test("sufficient budget with live rates → ok plan with both legs", async () => {
+    const service = buildPrepareService({ fxOk: true });
+    const plan = await service.prepareProvide(user, "JPYC", 50, "2000");
+    expect(plan.status).toBe("ok");
+    if (plan.status === "ok") {
+      expect(plan.payload.legs).toHaveLength(2);
+    }
+  });
+});
+
+describe("LiquidityService.minBudgetHint", () => {
+  test("returns the 2nd-smallest requirement across candidate markets", async () => {
+    const service = buildPrepareService({ fxOk: true });
+    const hint = await service.minBudgetHint("sepolia", "JPYC");
+    expect(hint).toBe("1398.196962");
+  });
+});
+
 describe("LiquidityService.cancelBatch", () => {
   test("signs CancelVLBatch {owner, vlBatchId: string} (verified live 2026-07-10)", async () => {
     const captured = {

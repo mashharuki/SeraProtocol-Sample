@@ -224,11 +224,19 @@ export const ja: MessageCatalog = {
   providePickToken: "💰 どのボールトトークンで気配を出しますか？",
   providePickSpread:
     "📐 市場レートからどれくらい離して気配を出しますか？\n\n<i>スプレッドが狭いほど約定しやすく、1回あたりの収益は小さくなります。</i>",
-  provideEnterBudget: (symbol: string) =>
-    `共有予算にする <b>${symbol}</b> の量を入力してください。（各マーケットに全額分の気配を出しますが、実際にロックされるのは最大の1本分のみです）\n\n例: <code>100</code>`,
+  provideEnterBudget: (symbol: string, min: string | null) =>
+    `共有予算にする <b>${symbol}</b> の量を入力してください。（各マーケットに全額分の気配を出しますが、実際にロックされるのは最大の1本分のみです）\n\n${
+      min
+        ? `最低額: 約 <b>${min} ${symbol}</b> — 各注文がマーケットの最小注文サイズを満たす必要があります。\n\n`
+        : ""
+    }例: <code>${min ?? "100"}</code>`,
   providePlanning: "ライブレートから流動性プランを作成しています… ⏳",
   provideNoMarkets: (symbol: string) =>
     `現在 <b>${symbol}</b> で気配を出せるマーケットがありません（VL バッチには最低2つ必要です）。別のトークンを試すか、/liquidity で状況を確認してください。`,
+  provideBudgetLow: (min: string, symbol: string) =>
+    `その予算では各マーケットの最小注文サイズに届きません。2つ以上のマーケットに気配を出すには <b>${min} ${symbol}</b> 以上を入力してください。`,
+  provideNoRates:
+    "⚠️ 参照用のライブ為替レートが一時的に取得できません（テストネット側のフィード障害）。安全な価格付けができないため、しばらくしてからもう一度お試しください。",
   provideLegLine: (
     market: string,
     side: string,

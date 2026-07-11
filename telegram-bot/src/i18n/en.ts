@@ -246,11 +246,19 @@ export const en = {
   providePickToken: "💰 Which vault token do you want to quote with?",
   providePickSpread:
     "📐 How far from the market rate should your quotes sit?\n\n<i>Tighter spread = fills more often, earns less per trade.</i>",
-  provideEnterBudget: (symbol: string) =>
-    `How much <b>${symbol}</b> as the shared budget? (Each market is quoted with the full amount; only the largest order is actually locked.)\n\nType a number, e.g. <code>100</code>.`,
+  provideEnterBudget: (symbol: string, min: string | null) =>
+    `How much <b>${symbol}</b> as the shared budget? (Each market is quoted with the full amount; only the largest order is actually locked.)\n\n${
+      min
+        ? `Minimum: about <b>${min} ${symbol}</b> — each order must clear its market's minimum size.\n\n`
+        : ""
+    }Type a number, e.g. <code>${min ?? "100"}</code>.`,
   providePlanning: "Building your liquidity plan from live rates… ⏳",
   provideNoMarkets: (symbol: string) =>
     `No market can currently be quoted with <b>${symbol}</b> (a VL batch needs at least 2). Try another token — or check /liquidity for what's active.`,
+  provideBudgetLow: (min: string, symbol: string) =>
+    `That budget is below the minimum order size of these markets. Enter at least <b>${min} ${symbol}</b> to quote 2+ markets.`,
+  provideNoRates:
+    "⚠️ Live FX reference rates are temporarily unavailable (testnet feed outage), so quotes can't be priced safely right now. Please try again in a little while.",
   provideLegLine: (
     market: string,
     side: string,

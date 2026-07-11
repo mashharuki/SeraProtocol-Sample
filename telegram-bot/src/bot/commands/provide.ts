@@ -60,7 +60,11 @@ provideComposer.callbackQuery(/^prov:spr:(\d+)$/, async (ctx) => {
   const draft = flow as ProvideDraft;
   draft.spreadBps = Number(ctx.match[1]);
   draft.step = "enter_budget";
-  await ctx.reply(ctx.t("provideEnterBudget", draft.spendSymbol ?? "?"), {
+  const spendSymbol = draft.spendSymbol ?? "?";
+  const min = await ctx.services.liquidity
+    .minBudgetHint(ctx.user.network, spendSymbol)
+    .catch(() => null);
+  await ctx.reply(ctx.t("provideEnterBudget", spendSymbol, min), {
     parse_mode: "HTML",
   });
 });

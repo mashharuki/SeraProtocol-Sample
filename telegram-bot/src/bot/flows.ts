@@ -99,6 +99,18 @@ async function handleProvideText(
       ctx.session.flow = undefined;
       return true;
     }
+    if (plan.status === "budget_low") {
+      // stay in enter_budget so the user can just type a bigger number
+      await ctx.reply(ctx.t("provideBudgetLow", plan.minBudget, plan.symbol), {
+        parse_mode: "HTML",
+      });
+      return true;
+    }
+    if (plan.status === "no_rates") {
+      await ctx.reply(ctx.t("provideNoRates"), { parse_mode: "HTML" });
+      ctx.session.flow = undefined;
+      return true;
+    }
     if (plan.status === "no_markets") {
       await ctx.reply(ctx.t("provideNoMarkets", draft.spendSymbol), {
         parse_mode: "HTML",
