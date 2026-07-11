@@ -1,12 +1,7 @@
 import { isAddress } from "viem";
 import { toUserMessageKey } from "../sera/errors";
 import { validateAmount } from "../sera/precision";
-import type {
-  MyContext,
-  OrderDraft,
-  ProvideDraft,
-  SwapDraft,
-} from "./context";
+import type { MyContext, OrderDraft, ProvideDraft, SwapDraft } from "./context";
 import { formatEth } from "./format";
 import { confirmKeyboard } from "./keyboards";
 

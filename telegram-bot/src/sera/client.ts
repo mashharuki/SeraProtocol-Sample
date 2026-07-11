@@ -277,9 +277,7 @@ export class SeraClient {
   // ---- virtual liquidity batches ----
 
   /** 2-50 signed orders sharing one collateral budget (limits from /config). */
-  async placeVlBatch(
-    orders: OrderSubmitRequest[],
-  ): Promise<SeraVlBatchResult> {
+  async placeVlBatch(orders: OrderSubmitRequest[]): Promise<SeraVlBatchResult> {
     return this.request("/orders/vl/batch", vlBatchResultSchema, {
       body: { orders },
     });

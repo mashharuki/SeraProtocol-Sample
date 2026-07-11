@@ -138,7 +138,9 @@ describe("LiquidityService.executeProvide", () => {
       const orderUuidRaw = uuidToBigInt(String(order.order_id));
       expect(previewUuid.orderId).toBe(orderUuidRaw);
       expect(previewUuid.legId).toBe(0n);
-      expect(previewUuid.groupId).toBe(orderUuidRaw >> 16n & ((1n << 112n) - 1n));
+      expect(previewUuid.groupId).toBe(
+        (orderUuidRaw >> 16n) & ((1n << 112n) - 1n),
+      );
 
       // the submitted uuid_int is VL-encoded: shared group, sequential leg
       const vl = decodeUuidInt(BigInt(String(order.uuid_int)));

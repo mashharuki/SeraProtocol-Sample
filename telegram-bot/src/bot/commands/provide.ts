@@ -60,10 +60,9 @@ provideComposer.callbackQuery(/^prov:spr:(\d+)$/, async (ctx) => {
   const draft = flow as ProvideDraft;
   draft.spreadBps = Number(ctx.match[1]);
   draft.step = "enter_budget";
-  await ctx.reply(
-    ctx.t("provideEnterBudget", draft.spendSymbol ?? "?"),
-    { parse_mode: "HTML" },
-  );
+  await ctx.reply(ctx.t("provideEnterBudget", draft.spendSymbol ?? "?"), {
+    parse_mode: "HTML",
+  });
 });
 
 // Cancel a whole VL batch. callback_data carries a member order_id (the
@@ -78,10 +77,7 @@ provideComposer.callbackQuery(/^prov:cx:(.+)$/, async (ctx) => {
       await ctx.reply(ctx.t("errorGeneric"));
       return;
     }
-    const res = await ctx.services.liquidity.cancelBatch(
-      user,
-      order.vlBatchId,
-    );
+    const res = await ctx.services.liquidity.cancelBatch(user, order.vlBatchId);
     if (res.status === "cooldown") {
       await ctx.reply(ctx.t("orderCancelCooldown", 5));
       return;
