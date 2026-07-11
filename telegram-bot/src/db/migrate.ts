@@ -54,6 +54,16 @@ const migrations: Migration[] = [
       )`,
     ],
   },
+  {
+    id: "002_vl_batch",
+    statements: [
+      // Orders placed via a Virtual Liquidity batch share a vl_batch_id
+      // (the batch's primary_id) so the whole batch can be cancelled at once.
+      "ALTER TABLE orders ADD COLUMN vl_batch_id TEXT",
+      `CREATE INDEX IF NOT EXISTS idx_orders_vl_batch
+        ON orders(vl_batch_id) WHERE vl_batch_id IS NOT NULL`,
+    ],
+  },
 ];
 
 export async function migrate(db: Db): Promise<void> {

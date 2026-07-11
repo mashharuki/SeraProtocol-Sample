@@ -26,6 +26,8 @@ export interface OrderRow {
   amount: string;
   status: string;
   placedAt: number;
+  /** Set when the order is a leg of a Virtual Liquidity batch. */
+  vlBatchId?: string | null;
 }
 
 export type PendingActionKind =
@@ -34,7 +36,9 @@ export type PendingActionKind =
   | "limit_order"
   | "cancel_order"
   | "deposit"
-  | "faucet_claim";
+  | "faucet_claim"
+  | "vl_batch"
+  | "vl_cancel";
 
 export interface PendingActionRow {
   id: string;
@@ -137,8 +141,8 @@ export class OrderRepository {
   async save(order: OrderRow): Promise<void> {
     await this.db.execute({
       sql: `INSERT INTO orders
-        (order_id, uuid_int, telegram_user_id, network, market, side, price, amount, status, placed_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (order_id, uuid_int, telegram_user_id, network, market, side, price, amount, status, placed_at, updated_at, vl_batch_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT (order_id) DO UPDATE SET status = excluded.status, updated_at = excluded.updated_at`,
       args: [
         order.orderId,
@@ -152,7 +156,16 @@ export class OrderRepository {
         order.status,
         order.placedAt,
         Date.now(),
+        order.vlBatchId ?? null,
       ],
+    });
+  }
+
+  /** Cancel every order in a VL batch locally (after /orders/vl/cancel). */
+  async cancelBatch(vlBatchId: string): Promise<void> {
+    await this.db.execute({
+      sql: "UPDATE orders SET status = 'cancelled', updated_at = ? WHERE vl_batch_id = ?",
+      args: [Date.now(), vlBatchId],
     });
   }
 
@@ -198,6 +211,7 @@ export class OrderRepository {
       amount: String(r.amount),
       status: String(r.status),
       placedAt: Number(r.placed_at),
+      vlBatchId: r.vl_batch_id == null ? null : String(r.vl_batch_id),
     };
   }
 }

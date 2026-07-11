@@ -216,6 +216,43 @@ export const ja: MessageCatalog = {
   depositSubmitted: (txUrl: string) =>
     `✅ 入金がオンチェーンで確定しました！ <a href="${txUrl}">トランザクションを確認</a>\n\nボールト残高に反映済みです。/balance で確認できます。`,
 
+  // ---- /provide (Virtual Liquidity) ----
+  provideIntro:
+    "💧 <b>流動性を提供</b>\n\nSera の Virtual Liquidity バッチを使い、<b>1つの共有予算</b>で複数マーケットに同時に気配（指値）を出せます。注文はそれぞれ別マーケットに置かれるため、実際にロックされるのは最大の1本分だけ — 残りは同じ担保を使い回します。\n\n板に載った注文はテイカーとの約定でスプレッド分の収益になり、そのペアを誰でもスワップできるようにします。",
+  provideNoVault:
+    "ボールト残高がありません。まず /deposit で入金してください（テストトークンは /faucet で入手できます）。",
+  providePickToken: "💰 どのボールトトークンで気配を出しますか？",
+  providePickSpread:
+    "📐 市場レートからどれくらい離して気配を出しますか？\n\n<i>スプレッドが狭いほど約定しやすく、1回あたりの収益は小さくなります。</i>",
+  provideEnterBudget: (symbol: string) =>
+    `共有予算にする <b>${symbol}</b> の量を入力してください。（各マーケットに全額分の気配を出しますが、実際にロックされるのは最大の1本分のみです）\n\n例: <code>100</code>`,
+  providePlanning: "ライブレートから流動性プランを作成しています… ⏳",
+  provideNoMarkets: (symbol: string) =>
+    `現在 <b>${symbol}</b> で気配を出せるマーケットがありません（VL バッチには最低2つ必要です）。別のトークンを試すか、/liquidity で状況を確認してください。`,
+  provideLegLine: (
+    market: string,
+    side: string,
+    price: string,
+    amount: string,
+    base: string,
+  ) =>
+    `• <b>${market}</b> ${side === "ask" ? "売り" : "買い"} ${amount} ${base} @ ${price}`,
+  providePlanCard: (p: {
+    budget: string;
+    symbol: string;
+    legCount: number;
+    lines: string;
+    networkLabel: string;
+  }) =>
+    `<b>🔎 流動性バッチの確認</b>\n\n共有予算: <b>${p.budget} ${p.symbol}</b>\n${p.legCount} マーケットに気配を出します:\n${p.lines}\n\n🌐 ${p.networkLabel}\n💡 注文は約定またはキャンセルまで板に残ります。/orders からバッチ全体をいつでもキャンセルできます（5分クールダウンあり）。`,
+  provideExecuting: (n: number) =>
+    `${n} 件の注文に署名してバッチを送信しています… ⏳`,
+  provideSuccess: (n: number, batchId: string) =>
+    `✅ <b>流動性の提供を開始しました！</b> ${n} 件の注文が共有予算から板に載っています。\n\nバッチ ID: <code>${batchId}</code>\n/orders から管理でき、ワンタップでバッチ全体をキャンセルできます。`,
+  provideBatchCancelled:
+    "✅ バッチ全体をキャンセルし、残りの予算の凍結を解除しました。",
+  provideCancelBatchButton: "🗑 VL バッチ全体をキャンセル",
+
   // ---- /network ----
   networkCurrent: (label: string) => `🌐 現在のネットワーク: <b>${label}</b>`,
   networkPick: "切り替え先:",

@@ -1,6 +1,7 @@
 import { Composer } from "grammy";
 import { toUserMessageKey } from "../sera/errors";
 import type { DepositActionPayload } from "../services/deposit-service";
+import type { ProvideActionPayload } from "../services/liquidity-service";
 import type {
   CancelActionPayload,
   OrderActionPayload,
@@ -72,6 +73,14 @@ actionsComposer.callbackQuery(/^act:c:(.+)$/, async (ctx) => {
         parse_mode: "HTML",
         link_preview_options: { is_disabled: true },
       });
+    } else if (kind === "vl_batch") {
+      const payload = result.payload as ProvideActionPayload;
+      await ctx.reply(ctx.t("provideExecuting", payload.legs.length));
+      const res = await ctx.services.liquidity.executeProvide(user, payload);
+      await ctx.reply(
+        ctx.t("provideSuccess", res.orderIds.length, res.vlBatchId),
+        { parse_mode: "HTML" },
+      );
     } else if (kind === "faucet_claim") {
       await ctx.reply(ctx.t("faucetClaiming"));
       const res = await ctx.services.faucet.executeClaim(user);

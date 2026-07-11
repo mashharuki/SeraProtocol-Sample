@@ -6,6 +6,7 @@ import { handleAgentMessage } from "./agent-bridge";
 import { actionsComposer } from "./callbacks";
 import { accountComposer } from "./commands/account";
 import { orderComposer } from "./commands/order";
+import { provideComposer } from "./commands/provide";
 import { rateComposer } from "./commands/rate";
 import { settingsComposer } from "./commands/settings";
 import { startComposer } from "./commands/start";
@@ -24,6 +25,7 @@ const COMMANDS: Record<Language, { command: string; description: string }[]> = {
     { command: "swap", description: "Instant exchange (no ETH needed)" },
     { command: "send", description: "Exchange & send to an address" },
     { command: "order", description: "Place a limit order" },
+    { command: "provide", description: "Provide liquidity (VL batch)" },
     { command: "orders", description: "View / cancel your orders" },
     { command: "deposit", description: "Move tokens into the Sera vault" },
     { command: "network", description: "Switch Mainnet / Sepolia" },
@@ -40,6 +42,7 @@ const COMMANDS: Record<Language, { command: string; description: string }[]> = {
     { command: "swap", description: "即時両替（ETH 不要）" },
     { command: "send", description: "両替して送金" },
     { command: "order", description: "指値注文" },
+    { command: "provide", description: "流動性を提供（VLバッチ）" },
     { command: "orders", description: "注文の確認・キャンセル" },
     { command: "deposit", description: "ボールトへ入金" },
     { command: "network", description: "ネットワーク切替" },
@@ -108,6 +111,7 @@ export function createBot(services: Services): Bot<MyContext> {
   bot.use(rateComposer);
   bot.use(swapComposer);
   bot.use(orderComposer);
+  bot.use(provideComposer);
   bot.use(settingsComposer);
 
   // Free text: active flow first, then the AI agent.

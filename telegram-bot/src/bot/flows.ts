@@ -1,7 +1,12 @@
 import { isAddress } from "viem";
 import { toUserMessageKey } from "../sera/errors";
 import { validateAmount } from "../sera/precision";
-import type { MyContext, OrderDraft, SwapDraft } from "./context";
+import type {
+  MyContext,
+  OrderDraft,
+  ProvideDraft,
+  SwapDraft,
+} from "./context";
 import { formatEth } from "./format";
 import { confirmKeyboard } from "./keyboards";
 
@@ -63,7 +68,82 @@ export async function handleFlowText(
   if (flow.type === "deposit") {
     return handleDepositText(ctx, flow, text);
   }
+  if (flow.type === "provide") {
+    return handleProvideText(ctx, flow as ProvideDraft, text);
+  }
   return false;
+}
+
+async function handleProvideText(
+  ctx: MyContext,
+  draft: ProvideDraft,
+  text: string,
+): Promise<boolean> {
+  const user = ctx.user;
+  if (!user || draft.step !== "enter_budget" || !draft.spendSymbol) {
+    return false;
+  }
+  const check = validateAmount(text, 6);
+  if (!check.ok || Number(text) <= 0) {
+    await ctx.reply(ctx.t("swapInvalidAmount", ""), { parse_mode: "HTML" });
+    return true;
+  }
+  await ctx.reply(ctx.t("providePlanning"));
+  try {
+    const plan = await ctx.services.liquidity.prepareProvide(
+      user,
+      draft.spendSymbol,
+      draft.spreadBps ?? 50,
+      text.trim().replace(/,/g, ""),
+    );
+    if (plan.status === "vault_short") {
+      await ctx.reply(
+        ctx.t("orderVaultShort", text, plan.available, plan.symbol),
+        { parse_mode: "HTML" },
+      );
+      ctx.session.flow = undefined;
+      return true;
+    }
+    if (plan.status === "no_markets") {
+      await ctx.reply(ctx.t("provideNoMarkets", draft.spendSymbol), {
+        parse_mode: "HTML",
+      });
+      ctx.session.flow = undefined;
+      return true;
+    }
+    const net = ctx.services.config.networks[user.network];
+    const lines = plan.payload.legs
+      .map((leg) =>
+        ctx.t(
+          "provideLegLine",
+          leg.marketSymbol,
+          leg.side,
+          leg.price,
+          leg.amount,
+          leg.baseSymbol,
+        ),
+      )
+      .join("\n");
+    await ctx.reply(
+      ctx.t("providePlanCard", {
+        budget: plan.payload.budgetHuman,
+        symbol: plan.payload.spendSymbol,
+        legCount: plan.payload.legs.length,
+        lines,
+        networkLabel: net.label,
+      }),
+      {
+        parse_mode: "HTML",
+        reply_markup: confirmKeyboard(ctx.t, plan.actionId),
+      },
+    );
+    ctx.session.flow = undefined;
+  } catch (err) {
+    console.error("prepareProvide failed:", err);
+    await ctx.reply(ctx.t(toUserMessageKey(err)));
+    ctx.session.flow = undefined;
+  }
+  return true;
 }
 
 async function handleSwapText(

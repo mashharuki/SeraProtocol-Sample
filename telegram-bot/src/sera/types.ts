@@ -168,3 +168,23 @@ export interface OrderPreviewRequest {
 }
 
 export type OrderSubmitRequest = OrderPreviewRequest & { signature: string };
+
+/**
+ * VL batch result. Shape from the API reference; vl_group.primary_id is the
+ * vl_batch_id used for CancelVLBatch.
+ */
+export const vlBatchResultSchema = z.object({
+  order_ids: z.array(z.string()),
+  amendments: z.array(z.record(z.string(), z.unknown())).optional(),
+  cancelled: z.array(z.unknown()).optional(),
+  fills: z.array(z.record(z.string(), z.unknown())).optional(),
+  vl_group: z
+    .object({
+      primary_id: z.union([z.string(), z.number()]),
+      max_budget: z.union([z.string(), z.number()]).optional(),
+      budget_consumed: z.union([z.string(), z.number()]).optional(),
+      spent_token: z.string().optional(),
+    })
+    .passthrough(),
+});
+export type SeraVlBatchResult = z.infer<typeof vlBatchResultSchema>;

@@ -13,6 +13,7 @@ import { SeraClient } from "../sera/client";
 import { AccountService } from "./account-service";
 import { DepositService } from "./deposit-service";
 import { FaucetService } from "./faucet-service";
+import { LiquidityService } from "./liquidity-service";
 import { OrderService } from "./order-service";
 import { PendingActionService } from "./pending-actions";
 import { RateService } from "./rate-service";
@@ -28,6 +29,7 @@ export interface Services {
   orders: OrderService;
   deposits: DepositService;
   faucet: FaucetService;
+  liquidity: LiquidityService;
   pendingActions: PendingActionService;
   /** Public (unauthenticated) Sera client for a network. */
   publicSera: (network: Network) => SeraClient;
@@ -90,6 +92,15 @@ export function buildServices(config: AppConfig, db: Db): Services {
     authedSera,
   );
   const faucet = new FaucetService(config, accounts, pendingActions, signer);
+  const liquidity = new LiquidityService(
+    rates,
+    orders,
+    pendingActions,
+    orderRepo,
+    signer,
+    publicSera,
+    authedSera,
+  );
 
   return {
     config,
@@ -100,6 +111,7 @@ export function buildServices(config: AppConfig, db: Db): Services {
     orders,
     deposits,
     faucet,
+    liquidity,
     pendingActions,
     publicSera,
     authedSera,

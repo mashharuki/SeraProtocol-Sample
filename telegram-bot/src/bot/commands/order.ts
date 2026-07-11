@@ -115,6 +115,13 @@ orderComposer.command("orders", async (ctx) => {
   }
   await ctx.reply(ctx.t("ordersTitle", net.label), { parse_mode: "HTML" });
   for (const order of orders) {
+    const kb = orderActionsKeyboard(ctx.t, order.orderId);
+    if (order.vlBatchId) {
+      kb.row().text(
+        ctx.t("provideCancelBatchButton"),
+        `prov:cx:${order.orderId}`,
+      );
+    }
     await ctx.reply(
       ctx.t(
         "orderLine",
@@ -122,11 +129,11 @@ orderComposer.command("orders", async (ctx) => {
         order.side,
         order.price,
         order.amount,
-        order.status,
+        order.vlBatchId ? `${order.status} · VL` : order.status,
       ),
       {
         parse_mode: "HTML",
-        reply_markup: orderActionsKeyboard(ctx.t, order.orderId),
+        reply_markup: kb,
       },
     );
   }

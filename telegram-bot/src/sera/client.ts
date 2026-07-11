@@ -21,6 +21,7 @@ import {
   type SeraSwapQuote,
   type SeraSwapResult,
   type SeraToken,
+  type SeraVlBatchResult,
   type SwapQuoteRequest,
   swapQuoteSchema,
   swapResultSchema,
@@ -28,6 +29,7 @@ import {
   tokensSchema,
   txSendResultSchema,
   unsignedTxSchema,
+  vlBatchResultSchema,
 } from "./types";
 
 /**
@@ -270,6 +272,25 @@ export class SeraClient {
     signature: string;
   }): Promise<void> {
     await this.request("/orders/cancel", orderPreviewSchema, { body });
+  }
+
+  // ---- virtual liquidity batches ----
+
+  /** 2-50 signed orders sharing one collateral budget (limits from /config). */
+  async placeVlBatch(
+    orders: OrderSubmitRequest[],
+  ): Promise<SeraVlBatchResult> {
+    return this.request("/orders/vl/batch", vlBatchResultSchema, {
+      body: { orders },
+    });
+  }
+
+  async cancelVlBatch(body: {
+    owner_address: string;
+    vl_batch_id: string;
+    signature: string;
+  }): Promise<void> {
+    await this.request("/orders/vl/cancel", orderPreviewSchema, { body });
   }
 
   // ---- deposits (unsigned tx builders + broadcast) ----

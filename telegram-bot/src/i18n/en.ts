@@ -238,6 +238,43 @@ export const en = {
   depositSubmitted: (txUrl: string) =>
     `✅ Deposit confirmed on-chain! <a href="${txUrl}">View the transaction</a>\n\nYour vault balance is updated — check it with /balance.`,
 
+  // ---- /provide (Virtual Liquidity) ----
+  provideIntro:
+    "💧 <b>Provide liquidity</b>\n\nQuote several markets at once from <b>one shared budget</b> using a Sera Virtual Liquidity batch. Since the orders sit on different markets, only the largest one locks your funds — the rest reuse the same collateral.\n\nYour resting orders earn the spread when takers trade against them, and they make those pairs swappable for everyone.",
+  provideNoVault:
+    "You have no vault balance to provide with. Use /deposit first (and /faucet if you need test tokens).",
+  providePickToken: "💰 Which vault token do you want to quote with?",
+  providePickSpread:
+    "📐 How far from the market rate should your quotes sit?\n\n<i>Tighter spread = fills more often, earns less per trade.</i>",
+  provideEnterBudget: (symbol: string) =>
+    `How much <b>${symbol}</b> as the shared budget? (Each market is quoted with the full amount; only the largest order is actually locked.)\n\nType a number, e.g. <code>100</code>.`,
+  providePlanning: "Building your liquidity plan from live rates… ⏳",
+  provideNoMarkets: (symbol: string) =>
+    `No market can currently be quoted with <b>${symbol}</b> (a VL batch needs at least 2). Try another token — or check /liquidity for what's active.`,
+  provideLegLine: (
+    market: string,
+    side: string,
+    price: string,
+    amount: string,
+    base: string,
+  ) =>
+    `• <b>${market}</b> ${side === "ask" ? "sell" : "buy"} ${amount} ${base} @ ${price}`,
+  providePlanCard: (p: {
+    budget: string;
+    symbol: string;
+    legCount: number;
+    lines: string;
+    networkLabel: string;
+  }) =>
+    `<b>🔎 Review your liquidity batch</b>\n\nShared budget: <b>${p.budget} ${p.symbol}</b>\nQuoting ${p.legCount} markets:\n${p.lines}\n\n🌐 ${p.networkLabel}\n💡 Orders rest on the book until filled or cancelled. Cancel the whole batch anytime from /orders (5-min cooldown applies).`,
+  provideExecuting: (n: number) =>
+    `Signing ${n} orders and submitting the batch… ⏳`,
+  provideSuccess: (n: number, batchId: string) =>
+    `✅ <b>Liquidity live!</b> ${n} orders are now resting on the book from one shared budget.\n\nBatch ID: <code>${batchId}</code>\nManage them via /orders — you can cancel the whole batch with one tap.`,
+  provideBatchCancelled:
+    "✅ The whole batch is cancelled and your remaining budget is unfrozen.",
+  provideCancelBatchButton: "🗑 Cancel whole VL batch",
+
   // ---- /network ----
   networkCurrent: (label: string) => `🌐 Current network: <b>${label}</b>`,
   networkPick: "Switch to:",

@@ -34,7 +34,14 @@ export interface DepositDraft {
   tokenSymbol?: string;
 }
 
-export type FlowDraft = SwapDraft | OrderDraft | DepositDraft;
+export interface ProvideDraft {
+  type: "provide";
+  step: "pick_token" | "pick_spread" | "enter_budget";
+  spendSymbol?: string;
+  spreadBps?: number;
+}
+
+export type FlowDraft = SwapDraft | OrderDraft | DepositDraft | ProvideDraft;
 
 export interface SessionData {
   /** Pre-onboarding language choice (before a user row exists). */

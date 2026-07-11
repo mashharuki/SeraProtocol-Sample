@@ -270,6 +270,13 @@ export class OrderService {
     return this.orders.listActive(user.telegramUserId, user.network);
   }
 
+  /** Look up one of the user's own orders in the local DB. */
+  async findLocal(user: UserRow, orderId: string): Promise<OrderRow | null> {
+    const order = await this.orders.find(orderId);
+    if (!order || order.telegramUserId !== user.telegramUserId) return null;
+    return order;
+  }
+
   /** Refresh a single order's status from the API into the DB. */
   async refreshOrderStatus(
     user: UserRow,
@@ -330,9 +337,10 @@ export class OrderService {
   }
 
   /**
-   * Execute a confirmed cancellation. CancelOrder struct fields follow the
-   * API reference ({owner_address, order_id, uuid_int} request); the EIP-712
-   * layout must be confirmed against the live API during E2E (Phase 5).
+   * Execute a confirmed cancellation. CancelOrder struct verified live
+   * 2026-07-10 (extracted from the official webapp bundle, then confirmed
+   * against the API): {owner: address, orderId: uint256} where orderId is
+   * the composite uuid_int.
    */
   async executeCancel(
     user: UserRow,
@@ -345,11 +353,11 @@ export class OrderService {
       types: {
         CancelOrder: [
           { name: "owner", type: "address" },
-          { name: "uuid", type: "uint256" },
+          { name: "orderId", type: "uint256" },
         ],
       },
       primaryType: "CancelOrder",
-      message: { owner: user.walletAddress, uuid: payload.uuidInt },
+      message: { owner: user.walletAddress, orderId: payload.uuidInt },
     });
     try {
       await sera.cancelOrder({
