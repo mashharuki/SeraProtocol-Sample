@@ -11,12 +11,21 @@ Load the `mastra` skill BEFORE any Mastra work. Never rely on cached knowledge �
 
 ## Project invariants (Sera FX bot — do not break)
 
-1. **Sign verbatim.** EIP-712 payloads from Sera (`route_params` from `/swap/quote`,
-   the `/orders/preview` response) are signed exactly as returned. Never reconstruct
-   or "fix" them client-side. **Sole documented exception:** VL batch legs — the
+1. **Sign verbatim.** EIP-712 *field values* from Sera (`route_params` from
+   `/swap/quote`, the `/orders/preview` response) are signed exactly as returned.
+   Never alter them client-side. **Sole documented exception:** VL batch legs — the
    preview only accepts standalone uuid_int encodings, so `liquidity-service.ts`
    swaps ONLY the `uuid` field to the VL encoding before signing (verified live
    2026-07-10); everything else stays verbatim.
+   - **Envelope differs by endpoint.** `/orders/preview` returns the full
+     `{eip712_order, eip712_types}` (message + types; domain from `/config`) —
+     use those as-is. `/swap/quote`'s `route_params` is the flat `Intent` struct
+     itself, with **no** domain/types/message wrapper (confirmed live
+     2026-07-12); `swap-service.ts` builds that wrapper — domain from
+     `GET /config`, hardcoded `Intent` types matching `SeraLib.IntentParams`
+     (see `orderbook-v2.md`) — around `route_params` unmodified as `message`.
+     Passing `route_params` straight to `signTypedData` (the old bug) silently
+     sent `domain`/`types`/`message: undefined` to Privy and broke every swap.
 2. **Address casing.** Read endpoints (`/balances` etc.) take `owner_address` in
    **lowercase**; signed payloads use the checksummed address as-is.
 3. **Money moves through one path only.** Every fund-moving flow creates a

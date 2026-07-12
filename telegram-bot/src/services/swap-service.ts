@@ -56,12 +56,35 @@ function normalizeExpiry(expiresAt: string | number | undefined): number {
   return Number.isNaN(parsed) ? Date.now() + 30_000 : parsed;
 }
 
-function extractIntentMessage(routeParams: Record<string, unknown>) {
-  const message = routeParams.message;
-  return (
-    typeof message === "object" && message !== null ? message : {}
-  ) as Record<string, unknown>;
-}
+/**
+ * `route_params` from `/swap/quote` is the flat `Intent` struct itself
+ * (taker, inputToken, outputToken, maxInputAmount, minOutputAmount,
+ * recipient, initialDepositAmount, uuid, deadline) — NOT wrapped in a
+ * `{domain, types, primaryType, message}` envelope like `/orders/preview`
+ * returns (confirmed live 2026-07-12: a real quote response has none of
+ * those wrapper keys). Passing it straight to `signTypedData` as before
+ * sent `domain`/`types`/`primaryType`/`message: undefined` to Privy — the
+ * actual cause of swaps failing. The domain now comes from `GET /config`
+ * (invariant #5); the type layout matches `SeraLib.IntentParams` (see
+ * orderbook-v2.md) since Sera doesn't return type info for swaps the way it
+ * does for orders. NOTE: `POST /swap` checks wallet balance before it
+ * checks the Intent signature, so a zero-balance probe wallet can't
+ * round-trip-verify this exact type layout against Sera's own signature
+ * check — confirm with a small real Sepolia swap after deploying.
+ */
+const INTENT_EIP712_TYPES: Record<string, unknown> = {
+  Intent: [
+    { name: "taker", type: "address" },
+    { name: "inputToken", type: "address" },
+    { name: "outputToken", type: "address" },
+    { name: "maxInputAmount", type: "uint256" },
+    { name: "minOutputAmount", type: "uint256" },
+    { name: "recipient", type: "address" },
+    { name: "initialDepositAmount", type: "uint256" },
+    { name: "uuid", type: "uint256" },
+    { name: "deadline", type: "uint48" },
+  ],
+};
 
 export class SwapService {
   constructor(
@@ -115,8 +138,7 @@ export class SwapService {
       recipient?: string;
     },
   ): Promise<SwapCard> {
-    const intent = extractIntentMessage(quote.route_params);
-    const minOutputRaw = String(intent.minOutputAmount ?? "0");
+    const minOutputRaw = String(quote.route_params.minOutputAmount ?? "0");
     const minOutput = formatDisplayAmount(
       fromRawUnits(minOutputRaw, meta.toDecimals),
     );
@@ -163,7 +185,8 @@ export class SwapService {
   }
 
   /**
-   * Execute a confirmed swap: sign route_params verbatim, submit.
+   * Execute a confirmed swap: sign route_params (verbatim, as the EIP-712
+   * message) wrapped in the Intent domain/types, submit.
    * Returns "requoted" with a fresh card when the quote went stale.
    */
   async executeSwap(
@@ -178,11 +201,14 @@ export class SwapService {
       }
     | { status: "requoted"; card: SwapCard }
   > {
-    const signature = await this.signer.signTypedData(
-      user.walletId,
-      payload.routeParams as unknown as SeraTypedDataPayload,
-    );
     const sera = this.publicSera(user.network);
+    const config = await sera.getConfig();
+    const signature = await this.signer.signTypedData(user.walletId, {
+      domain: config.eip712_domain as unknown as Record<string, unknown>,
+      types: INTENT_EIP712_TYPES,
+      primaryType: "Intent",
+      message: payload.routeParams,
+    } satisfies SeraTypedDataPayload);
     try {
       await sera.submitSwap({ uuid: payload.uuid, signature });
       return {
