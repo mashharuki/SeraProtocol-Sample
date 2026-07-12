@@ -1,5 +1,7 @@
 # Sera FX Telegram Bot
 
+![](./../docs/image.png)
+
 Sera Protocol をフル活用した、オンチェーン・ステーブルコイン FX 特化の Telegram bot。
 FX・オンチェーン金融・ステーブルコイン初心者でも、シードフレーズなし（Privy サーバーウォレット）で
 安全にガイドされながら取引できます。英語・日本語対応、Ethereum Mainnet / Sepolia 両対応。
@@ -10,7 +12,7 @@ trade, English/Japanese, Mainnet + Sepolia.
 
 ## Demo Video
 
-[![demo]()](https://youtu.be/vDMDAgapwSU)
+[![]()](https://youtu.be/vDMDAgapwSU)
 
 ## Features
 
