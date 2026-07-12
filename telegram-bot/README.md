@@ -10,7 +10,7 @@ trade, English/Japanese, Mainnet + Sepolia.
 
 ## Demo Video
 
-[![demo]()](https://youtu.be/qF3D--eui8o)
+[![demo]()](https://youtu.be/vDMDAgapwSU)
 
 ## Features
 
