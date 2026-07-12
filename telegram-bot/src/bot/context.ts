@@ -41,7 +41,17 @@ export interface ProvideDraft {
   spreadBps?: number;
 }
 
-export type FlowDraft = SwapDraft | OrderDraft | DepositDraft | ProvideDraft;
+export interface ImportKeyDraft {
+  type: "import_key";
+  step: "enter_key";
+}
+
+export type FlowDraft =
+  | SwapDraft
+  | OrderDraft
+  | DepositDraft
+  | ProvideDraft
+  | ImportKeyDraft;
 
 export interface SessionData {
   /** Pre-onboarding language choice (before a user row exists). */

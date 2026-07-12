@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { SeraClient } from "./client";
+import { SeraClient } from "../../src/sera/client";
 
 function stubFetch(
   handler: (

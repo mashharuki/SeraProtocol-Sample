@@ -4,7 +4,7 @@ import {
   fromRawUnits,
   toRawUnits,
   validateAmount,
-} from "./precision";
+} from "../../src/sera/precision";
 
 describe("validateAmount", () => {
   test("accepts plain and decimal numbers within precision", () => {

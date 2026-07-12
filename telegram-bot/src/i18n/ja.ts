@@ -46,6 +46,30 @@ export const ja: MessageCatalog = {
     `🪪 <b>あなたのウォレット</b>\n\nアドレス:\n<code>${address}</code>\n\n🌐 ${networkLabel}\n🔍 <a href="${explorerUrl}">Etherscan で見る</a>\n\n` +
     "💡 このアドレスにステーブルコイン（例: USDC）を送ると残高に反映されます。",
 
+  // ---- /exportkey /importkey ----
+  keyExportWarn:
+    "🔑 <b>秘密鍵をエクスポート</b>\n\n⚠️ <b>この鍵を持つ人は誰でもあなたのウォレットと資金を完全に支配できます（取り消し不可）。</b>\n\n• 鍵は<b>60秒後に自動削除される</b>チャットメッセージで表示されます。\n• Telegram は安全な保管庫ではありません。鍵を安全な場所に保存し、コピーは削除してください。\n• 絶対に他人に共有しないでください。Sera チームが鍵を尋ねることはありません。\n\n続行しますか？",
+  keyExportButton: "🔑 秘密鍵を表示する",
+  keyExportCard: (key: string) =>
+    `🔑 <b>あなたの秘密鍵</b>（このメッセージは60秒後に自動消去されます）:\n\n<code>${key}</code>\n\n⚠️ 今すぐ安全な場所に保存してください。絶対に共有しないこと。`,
+  keyExportDeleted:
+    "🗑 秘密鍵のメッセージを削除しました。保存し忘れた場合は、もう一度 /exportkey を実行してください。",
+  keyExportFailed:
+    "❌ 秘密鍵をエクスポートできませんでした。少し時間をおいて再度お試しください。",
+  keyTransferDisabled:
+    "🔒 この bot では鍵のエクスポート／インポートが有効化されていません。運用者がウォレット認可キーを設定する必要があります。",
+  keyImportWarn:
+    "📥 <b>秘密鍵をインポート</b>\n\nインポートしたウォレットで<b>現在の bot ウォレットを置き換えます</b>。\n\n⚠️ 重要:\n• 現在のウォレットのボールト残高や未約定注文は、この bot から<b>見えなくなります</b>。必要なら先に出金・キャンセルしてください。\n• <b>自分が所有する</b>鍵のみをインポートしてください。他人から送られた鍵は絶対に貼らないこと。\n• 貼り付けたメッセージは<b>即座に削除</b>されます。\n\n続行しますか？",
+  keyImportButton: "📥 インポートに進む",
+  keyImportPrompt:
+    "インポートする秘密鍵を貼り付けてください（0x… の64桁16進数）。貼り付け後すぐにメッセージは削除されます。",
+  keyImportInvalid:
+    "❌ 有効な秘密鍵ではないようです。64桁の16進数の鍵（0x 有無どちらでも可）を貼り付けるか、/cancel してください。",
+  keyImportSuccess: (address: string, networkLabel: string) =>
+    `✅ <b>ウォレットをインポートしました。</b>\n\n新しいアドレス:\n<code>${address}</code>\n\n🌐 ${networkLabel}\n\nSera API キーはリセットされ、次回の操作時に自動で再発行されます。取引を始めるにはこのアドレスに入金してください。`,
+  keyImportFailed:
+    "❌ ウォレットをインポートできませんでした。変更は行われていません。少し時間をおいて再度お試しください。",
+
   // ---- /balance ----
   balanceTitle: (networkLabel: string) =>
     `💰 <b>アカウントサマリー</b> — ${networkLabel}`,

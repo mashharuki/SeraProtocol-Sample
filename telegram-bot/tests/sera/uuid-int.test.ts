@@ -4,7 +4,7 @@ import {
   decodeUuidInt,
   encodeUuidInt,
   uuidToBigInt,
-} from "./uuid-int";
+} from "../../src/sera/uuid-int";
 
 describe("uuid-int encoding", () => {
   test("round-trips a UUID through encode/decode", () => {

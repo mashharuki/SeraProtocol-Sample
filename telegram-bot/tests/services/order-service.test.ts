@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import type { UserRow } from "../db/repositories";
-import type { SeraTypedDataPayload } from "../privy/signer";
-import { OrderService } from "./order-service";
+import type { UserRow } from "../../src/db/repositories";
+import type { SeraTypedDataPayload } from "../../src/privy/signer";
+import { OrderService } from "../../src/services/order-service";
 
 const user: UserRow = {
   telegramUserId: 1,

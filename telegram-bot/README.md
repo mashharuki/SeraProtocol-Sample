@@ -25,6 +25,7 @@ trade, English/Japanese, Mainnet + Sepolia.
 | `/order` `/orders` | 板への指値注文・状況確認・キャンセル（5分クールダウン対応） |
 | `/provide` | **流動性提供** — Sera Virtual Liquidity バッチで複数マーケットに1つの共有予算から気配を出す（ロックは最大1本分のみ、`/orders` から一括キャンセル） |
 | `/deposit` | Sera Vault への入金（approve + deposit、こちらは要ガス ETH） |
+| `/exportkey` `/importkey` | ウォレット秘密鍵のエクスポート／インポート（HPKE 暗号化・警告カード付き。エクスポートは60秒で自動消去、インポートは現ウォレットを置換） |
 | `/network` `/language` | Mainnet ⇄ Sepolia 切替 / EN ⇄ JA 切替 |
 | 自由入力 | Mastra AI エージェント（claude-sonnet-4-5）が初心者向けに解説 + 取引を**準備** |
 

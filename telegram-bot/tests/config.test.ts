@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { loadConfig } from "./config";
+import { loadConfig } from "../src/config";
 
 const required = {
   TELEGRAM_BOT_TOKEN: "123:abc",

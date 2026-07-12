@@ -1,9 +1,18 @@
+import { InputFile } from "grammy";
 import { isAddress } from "viem";
+import { describeKeyOpError } from "../privy/signer";
 import { toUserMessageKey } from "../sera/errors";
 import { validateAmount } from "../sera/precision";
-import type { MyContext, OrderDraft, ProvideDraft, SwapDraft } from "./context";
+import type {
+  ImportKeyDraft,
+  MyContext,
+  OrderDraft,
+  ProvideDraft,
+  SwapDraft,
+} from "./context";
 import { formatEth } from "./format";
 import { confirmKeyboard } from "./keyboards";
+import { addressQrPng } from "./qr";
 
 /**
  * Minimum base amount for an order draft: asks use min_ask_amount directly;
@@ -66,7 +75,55 @@ export async function handleFlowText(
   if (flow.type === "provide") {
     return handleProvideText(ctx, flow as ProvideDraft, text);
   }
+  if (flow.type === "import_key") {
+    return handleImportKeyText(ctx, flow as ImportKeyDraft, text);
+  }
   return false;
+}
+
+async function handleImportKeyText(
+  ctx: MyContext,
+  _draft: ImportKeyDraft,
+  text: string,
+): Promise<boolean> {
+  const user = ctx.user;
+  if (!user) return false;
+  // Delete the pasted key message immediately, whatever happens next.
+  if (ctx.message) {
+    await ctx.api
+      .deleteMessage(ctx.message.chat.id, ctx.message.message_id)
+      .catch(() => {});
+  }
+  let res: Awaited<ReturnType<typeof ctx.services.walletKeys.importKey>>;
+  try {
+    res = await ctx.services.walletKeys.importKey(user, text);
+  } catch (err) {
+    // We only ever send Privy the HPKE-encrypted key, so a failure reason
+    // carries no plaintext key — safe to log and show.
+    const reason = describeKeyOpError(err);
+    console.error("importKey failed:", reason);
+    ctx.session.flow = undefined;
+    await ctx.reply(`${ctx.t("keyImportFailed")}\n\n(${reason})`);
+    return true;
+  }
+  if (!res.ok) {
+    // stay in the flow so the user can paste a corrected key
+    await ctx.reply(ctx.t("keyImportInvalid"));
+    return true;
+  }
+  ctx.session.flow = undefined;
+  const net = ctx.services.config.networks[user.network];
+  const caption = ctx.t("keyImportSuccess", res.address, net.label);
+  try {
+    const qr = await addressQrPng(res.address);
+    await ctx.replyWithPhoto(new InputFile(qr, "wallet-qr.png"), {
+      caption,
+      parse_mode: "HTML",
+    });
+  } catch {
+    await ctx.reply(caption, { parse_mode: "HTML" });
+  }
+  return true;
 }
 
 async function handleProvideText(

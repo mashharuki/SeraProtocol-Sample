@@ -68,6 +68,30 @@ export const en = {
     `🪪 <b>Your wallet</b>\n\nAddress:\n<code>${address}</code>\n\n🌐 ${networkLabel}\n🔍 <a href="${explorerUrl}">View on Etherscan</a>\n\n` +
     "💡 Send stablecoins (e.g. USDC) to this address to fund your account.",
 
+  // ---- /exportkey /importkey ----
+  keyExportWarn:
+    "🔑 <b>Export your private key</b>\n\n⚠️ <b>Anyone with this key controls your wallet and funds — irreversibly.</b>\n\n• It will be shown in a chat message that <b>auto-deletes in 60 seconds</b>.\n• Telegram is not a secure vault — save the key somewhere safe and delete any copies.\n• Never share it. The Sera team will never ask for it.\n\nDo you want to continue?",
+  keyExportButton: "🔑 Show my private key",
+  keyExportCard: (key: string) =>
+    `🔑 <b>Your private key</b> (this message self-destructs in 60s):\n\n<code>${key}</code>\n\n⚠️ Save it now, somewhere safe. Never share it.`,
+  keyExportDeleted:
+    "🗑 The private-key message was deleted. If you didn't save the key, run /exportkey again.",
+  keyExportFailed:
+    "❌ Could not export the private key. Please try again in a moment.",
+  keyTransferDisabled:
+    "🔒 Key export/import isn't enabled on this bot. The operator needs to configure a wallet authorization key first.",
+  keyImportWarn:
+    "📥 <b>Import a private key</b>\n\nThis <b>replaces</b> your current bot wallet with the one you import.\n\n⚠️ Important:\n• Your current wallet's vault balance and open orders will <b>no longer be visible</b> in this bot. Withdraw/cancel them first if needed.\n• Only import a key <b>you own</b>. Never paste a key someone sent you.\n• Your pasted message will be <b>deleted immediately</b>.\n\nDo you want to continue?",
+  keyImportButton: "📥 Continue to import",
+  keyImportPrompt:
+    "Paste the private key to import (0x… , 64 hex chars). Your message will be deleted right after.",
+  keyImportInvalid:
+    "❌ That doesn't look like a valid private key. Paste a 64-character hex key (with or without the 0x prefix), or /cancel.",
+  keyImportSuccess: (address: string, networkLabel: string) =>
+    `✅ <b>Wallet imported.</b>\n\nNew address:\n<code>${address}</code>\n\n🌐 ${networkLabel}\n\nYour Sera API keys were reset and will re-issue automatically on your next action. Fund this address to start trading.`,
+  keyImportFailed:
+    "❌ Could not import the wallet. Nothing was changed. Please try again in a moment.",
+
   // ---- /balance ----
   balanceTitle: (networkLabel: string) =>
     `💰 <b>Account summary</b> — ${networkLabel}`,

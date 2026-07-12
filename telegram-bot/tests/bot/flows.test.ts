@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { orderMinBase } from "./flows";
+import { orderMinBase } from "../../src/bot/flows";
 
 describe("orderMinBase", () => {
   test("ask uses min_ask_amount directly, trimming trailing zeros", () => {

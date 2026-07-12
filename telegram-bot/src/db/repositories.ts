@@ -102,6 +102,17 @@ export class UserRepository {
       args: [network, Date.now(), telegramUserId],
     });
   }
+
+  /** Point the user at a different Privy wallet (after a key import). */
+  async replaceWallet(
+    telegramUserId: number,
+    wallet: { walletId: string; walletAddress: string },
+  ): Promise<void> {
+    await this.db.execute({
+      sql: "UPDATE users SET wallet_id = ?, wallet_address = ?, updated_at = ? WHERE telegram_user_id = ?",
+      args: [wallet.walletId, wallet.walletAddress, Date.now(), telegramUserId],
+    });
+  }
 }
 
 export class ApiKeyRepository {
@@ -131,6 +142,14 @@ export class ApiKeyRepository {
         ON CONFLICT (telegram_user_id, network)
         DO UPDATE SET api_key = excluded.api_key, api_secret = excluded.api_secret`,
       args: [telegramUserId, network, key.apiKey, key.apiSecret, Date.now()],
+    });
+  }
+
+  /** Drop every Sera key for a user (both networks) — used after a wallet swap. */
+  async deleteAll(telegramUserId: number): Promise<void> {
+    await this.db.execute({
+      sql: "DELETE FROM user_api_keys WHERE telegram_user_id = ?",
+      args: [telegramUserId],
     });
   }
 }

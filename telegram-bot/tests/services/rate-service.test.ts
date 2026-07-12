@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { RateService } from "./rate-service";
+import { RateService } from "../../src/services/rate-service";
 
 const tokens = [
   // 1e6 min → probe amount = max(2×min, 1 unit) = 2000000

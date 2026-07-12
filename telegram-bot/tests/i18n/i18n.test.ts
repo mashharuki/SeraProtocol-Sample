@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { en } from "./en";
-import { ja } from "./ja";
-import { makeTranslator } from "./messages";
+import { en } from "../../src/i18n/en";
+import { ja } from "../../src/i18n/ja";
+import { makeTranslator } from "../../src/i18n/messages";
 
 describe("i18n catalogs", () => {
   test("ja covers exactly the same keys as en", () => {

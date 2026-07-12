@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import type { UserRow } from "../db/repositories";
-import { DepositService, normalizeTxForPrivy } from "./deposit-service";
+import type { UserRow } from "../../src/db/repositories";
+import {
+  DepositService,
+  normalizeTxForPrivy,
+} from "../../src/services/deposit-service";
 
 const user: UserRow = {
   telegramUserId: 1,

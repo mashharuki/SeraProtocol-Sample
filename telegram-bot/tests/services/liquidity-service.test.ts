@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import type { UserRow } from "../db/repositories";
-import type { SeraTypedDataPayload } from "../privy/signer";
-import { decodeUuidInt, uuidToBigInt } from "../sera/uuid-int";
-import { LiquidityService } from "./liquidity-service";
+import type { UserRow } from "../../src/db/repositories";
+import type { SeraTypedDataPayload } from "../../src/privy/signer";
+import { decodeUuidInt, uuidToBigInt } from "../../src/sera/uuid-int";
+import { LiquidityService } from "../../src/services/liquidity-service";
 
 const user: UserRow = {
   telegramUserId: 1,

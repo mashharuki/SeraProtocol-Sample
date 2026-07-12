@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { normalizeTxForPrivy } from "../services/deposit-service";
-import { extractErrorCode } from "./client";
-import { SeraApiError, toUserMessageKey } from "./errors";
+import { extractErrorCode } from "../../src/sera/client";
+import { SeraApiError, toUserMessageKey } from "../../src/sera/errors";
+import { normalizeTxForPrivy } from "../../src/services/deposit-service";
 
 describe("extractErrorCode (live formats)", () => {
   test("top-level error_code", () => {

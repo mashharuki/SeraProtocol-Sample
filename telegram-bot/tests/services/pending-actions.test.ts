@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { createDb } from "../db/client";
-import { migrate } from "../db/migrate";
-import { PendingActionRepository } from "../db/repositories";
-import { PendingActionService } from "./pending-actions";
+import { createDb } from "../../src/db/client";
+import { migrate } from "../../src/db/migrate";
+import { PendingActionRepository } from "../../src/db/repositories";
+import { PendingActionService } from "../../src/services/pending-actions";
 
 async function makeService() {
   const db = createDb(":memory:");

@@ -49,6 +49,12 @@ const envSchema = z.object({
     .url()
     .default("https://api-testnet.sera.cx/api/v1"),
   DEFAULT_NETWORK: z.enum(["mainnet", "sepolia"]).default("sepolia"),
+  // App-held P-256 authorization key (owner of server wallets) — enables
+  // /exportkey and /importkey. Both base64: PKCS8 private, SPKI public.
+  // Generate with `bun scripts/gen-wallet-auth-key.ts`. Optional: without it,
+  // wallets stay owner-less and key export/import are disabled.
+  WALLET_AUTH_PRIVATE_KEY: z.string().optional(),
+  WALLET_AUTH_PUBLIC_KEY: z.string().optional(),
 });
 
 export interface AppConfig {
@@ -63,6 +69,8 @@ export interface AppConfig {
   databaseAuthToken?: string;
   defaultNetwork: Network;
   networks: Record<Network, NetworkConfig>;
+  /** App-held wallet-owner authorization key (both base64), if configured. */
+  walletAuth?: { privateKeyPkcs8: string; publicKeySpki: string };
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -90,6 +98,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     databaseUrl: e.DATABASE_URL,
     databaseAuthToken: e.DATABASE_AUTH_TOKEN,
     defaultNetwork: e.DEFAULT_NETWORK,
+    walletAuth:
+      e.WALLET_AUTH_PRIVATE_KEY && e.WALLET_AUTH_PUBLIC_KEY
+        ? {
+            privateKeyPkcs8: e.WALLET_AUTH_PRIVATE_KEY,
+            publicKeySpki: e.WALLET_AUTH_PUBLIC_KEY,
+          }
+        : undefined,
     networks: {
       mainnet: {
         seraBaseUrl: e.SERA_API_URL_MAINNET,

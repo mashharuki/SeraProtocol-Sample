@@ -19,6 +19,7 @@ import { PendingActionService } from "./pending-actions";
 import { RateService } from "./rate-service";
 import { SwapService } from "./swap-service";
 import { UserService } from "./user-service";
+import { WalletKeyService } from "./wallet-key-service";
 
 export interface Services {
   config: AppConfig;
@@ -30,6 +31,7 @@ export interface Services {
   deposits: DepositService;
   faucet: FaucetService;
   liquidity: LiquidityService;
+  walletKeys: WalletKeyService;
   pendingActions: PendingActionService;
   /** Public (unauthenticated) Sera client for a network. */
   publicSera: (network: Network) => SeraClient;
@@ -39,7 +41,15 @@ export interface Services {
 
 export function buildServices(config: AppConfig, db: Db): Services {
   const privy = createPrivyClient(config.privyAppId, config.privyAppSecret);
-  const signer = new PrivySigner(privy);
+  const signer = new PrivySigner(
+    privy,
+    config.walletAuth
+      ? {
+          privateKeyPkcs8: config.walletAuth.privateKeyPkcs8,
+          publicKeySpki: config.walletAuth.publicKeySpki,
+        }
+      : undefined,
+  );
 
   const userRepo = new UserRepository(db);
   const apiKeyRepo = new ApiKeyRepository(db);
@@ -101,6 +111,7 @@ export function buildServices(config: AppConfig, db: Db): Services {
     publicSera,
     authedSera,
   );
+  const walletKeys = new WalletKeyService(signer, userRepo, apiKeyRepo);
 
   return {
     config,
@@ -112,6 +123,7 @@ export function buildServices(config: AppConfig, db: Db): Services {
     deposits,
     faucet,
     liquidity,
+    walletKeys,
     pendingActions,
     publicSera,
     authedSera,

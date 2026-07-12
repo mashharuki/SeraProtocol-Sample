@@ -1,10 +1,14 @@
-import { Composer, InputFile } from "grammy";
-import type { MyContext } from "../context";
+import { Composer, InlineKeyboard, InputFile } from "grammy";
+import { describeKeyOpError } from "../../privy/signer";
+import type { ImportKeyDraft, MyContext } from "../context";
 import { formatEth } from "../format";
 import { confirmKeyboard } from "../keyboards";
 import { addressQrPng } from "../qr";
 
 export const accountComposer = new Composer<MyContext>();
+
+/** How long the exported-key message stays before the bot deletes it. */
+const KEY_MESSAGE_TTL_MS = 60_000;
 
 accountComposer.command("wallet", async (ctx) => {
   const user = ctx.user;
@@ -28,6 +32,93 @@ accountComposer.command("wallet", async (ctx) => {
       link_preview_options: { is_disabled: true },
     });
   }
+});
+
+// ---- /exportkey — reveal the wallet private key (warned + auto-deleted) ----
+accountComposer.command("exportkey", async (ctx) => {
+  if (!ctx.user) {
+    await ctx.reply(ctx.t("notOnboarded"));
+    return;
+  }
+  if (!ctx.services.walletKeys.enabled) {
+    await ctx.reply(ctx.t("keyTransferDisabled"));
+    return;
+  }
+  const kb = new InlineKeyboard()
+    .text(ctx.t("keyExportButton"), "key:exp")
+    .row()
+    .text(ctx.t("cancelButton"), "key:x");
+  await ctx.reply(ctx.t("keyExportWarn"), {
+    parse_mode: "HTML",
+    reply_markup: kb,
+  });
+});
+
+accountComposer.callbackQuery("key:exp", async (ctx) => {
+  await ctx.answerCallbackQuery();
+  const user = ctx.user;
+  if (!user) return;
+  await ctx.editMessageReplyMarkup({ reply_markup: undefined }).catch(() => {});
+  let key: string;
+  try {
+    key = await ctx.services.walletKeys.exportKey(user);
+  } catch (err) {
+    // A failed export never carries the key (it's only in a successful,
+    // encrypted response), so the reason is safe to log and show.
+    const reason = describeKeyOpError(err);
+    console.error("exportKey failed:", reason);
+    await ctx.reply(`${ctx.t("keyExportFailed")}\n\n(${reason})`);
+    return;
+  }
+  const sent = await ctx.reply(ctx.t("keyExportCard", key), {
+    parse_mode: "HTML",
+  });
+  // Self-destruct: delete the key message, then note it's gone.
+  const chatId = sent.chat.id;
+  const messageId = sent.message_id;
+  setTimeout(() => {
+    ctx.api
+      .deleteMessage(chatId, messageId)
+      .then(() => ctx.api.sendMessage(chatId, ctx.t("keyExportDeleted")))
+      .catch(() => {});
+  }, KEY_MESSAGE_TTL_MS);
+});
+
+// ---- /importkey — replace the bot wallet with an imported private key ----
+accountComposer.command("importkey", async (ctx) => {
+  if (!ctx.user) {
+    await ctx.reply(ctx.t("notOnboarded"));
+    return;
+  }
+  if (!ctx.services.walletKeys.enabled) {
+    await ctx.reply(ctx.t("keyTransferDisabled"));
+    return;
+  }
+  const kb = new InlineKeyboard()
+    .text(ctx.t("keyImportButton"), "key:imp")
+    .row()
+    .text(ctx.t("cancelButton"), "key:x");
+  await ctx.reply(ctx.t("keyImportWarn"), {
+    parse_mode: "HTML",
+    reply_markup: kb,
+  });
+});
+
+accountComposer.callbackQuery("key:imp", async (ctx) => {
+  await ctx.answerCallbackQuery();
+  if (!ctx.user) return;
+  await ctx.editMessageReplyMarkup({ reply_markup: undefined }).catch(() => {});
+  ctx.session.flow = {
+    type: "import_key",
+    step: "enter_key",
+  } as ImportKeyDraft;
+  await ctx.reply(ctx.t("keyImportPrompt"));
+});
+
+accountComposer.callbackQuery("key:x", async (ctx) => {
+  await ctx.answerCallbackQuery();
+  await ctx.editMessageReplyMarkup({ reply_markup: undefined }).catch(() => {});
+  await ctx.reply(ctx.t("cancelled"));
 });
 
 accountComposer.command("faucet", async (ctx) => {
