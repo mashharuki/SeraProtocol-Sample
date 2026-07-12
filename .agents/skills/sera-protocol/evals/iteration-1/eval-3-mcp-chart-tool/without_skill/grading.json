@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "run_type": "without_skill",
+  "expectations": [
+    {"text": "identifies_schema_file", "passed": true, "evidence": "Section 2: schemas/index.ts with GetChartDataInputSchema"},
+    {"text": "identifies_subgraph_service", "passed": true, "evidence": "Section 3: services/subgraph.ts with getChartData() function"},
+    {"text": "identifies_read_tools", "passed": true, "evidence": "Section 4: tools/read-tools.ts with sera_get_chart_data registration"},
+    {"text": "chartlogs_query", "passed": false, "evidence": "Uses 'candles' entity instead of correct 'chartLogs'. Notes uncertainty: 'Subgraph側にCandleエンティティが存在することが前提条件'"},
+    {"text": "interval_type_param", "passed": false, "evidence": "Only 6 intervals ['1m','5m','15m','1h','4h','1d'] - missing '1w' (weekly)"},
+    {"text": "follows_existing_patterns", "passed": true, "evidence": "Good pattern match with existing tools: Zod schema, service function, tool registration with annotations"},
+    {"text": "ohlcv_fields", "passed": true, "evidence": "OhlcvCandle interface: timestamp, open, high, low, close, volume"}
+  ]
+}

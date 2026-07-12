@@ -1,0 +1,6 @@
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+CLAUDE_CODE_ENABLE_TELEMETRY = "0"
+OTEL_METRICS_EXPORTER = "otlp"

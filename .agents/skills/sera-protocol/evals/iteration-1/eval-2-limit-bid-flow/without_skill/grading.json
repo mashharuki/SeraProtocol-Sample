@@ -1,0 +1,15 @@
+{
+  "eval_id": 2,
+  "run_type": "without_skill",
+  "expectations": [
+    {"text": "correct_router_address", "passed": true, "evidence": "Line 20: ROUTER_ADDRESS = '0x82bfe1b31b6c1c3d201a0256416a18d93331d99e'"},
+    {"text": "erc20_approve_step", "passed": true, "evidence": "Lines 112-160: approveTokenIfNeeded function with allowance check"},
+    {"text": "simulate_before_send", "passed": true, "evidence": "Lines 203-222: simulateContract before writeContract"},
+    {"text": "correct_limit_order_params", "passed": true, "evidence": "Lines 187-199: All fields present including claimBounty, priceIndex, rawAmount=500n, postOnly=true, baseAmount=0n"},
+    {"text": "wait_for_receipt", "passed": true, "evidence": "Line 239: waitForTransactionReceipt"},
+    {"text": "uses_viem", "passed": true, "evidence": "Lines 2-10: All necessary viem imports"},
+    {"text": "sepolia_chain", "passed": true, "evidence": "Lines 37-46: defineChain with id 11155111"},
+    {"text": "deadline_set", "passed": true, "evidence": "Line 185: BigInt(Math.floor(Date.now() / 1000) + 3600)"},
+    {"text": "complete_flow", "passed": false, "evidence": "Missing: (1) No market info fetch - uses hardcoded placeholder QUOTE_TOKEN_ADDRESS=0x0000...0000, (2) Approve amount is RAW_AMOUNT*10_000n (wrong formula - should be rawAmount*quoteUnit), (3) No order status polling after placement, (4) No postOnly safety check"}
+  ]
+}

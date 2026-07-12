@@ -1,0 +1,47 @@
+{
+  "skill_name": "fx-trading-features",
+  "evals": [
+    {
+      "id": 1,
+      "name": "leverage-margin-design",
+      "prompt": "Sera Protocol(v2、Sera/Vault/SeraSORのアーキテクチャ)の上に、ユーザーが最大10倍までのレバレッジをかけて証拠金取引できる機能を追加したいです。ポジション管理、証拠金維持率の計算、追証(マージンコール)とロスカットの仕組みを含めて、どう設計すればいいか教えてください。",
+      "expected_output": "Sera v1/v2はスポット決済のみでレバレッジ機能が存在しないことを明示した上で、シンセティック(perpetual型)方式とレンディング統合方式の2パターンを比較し、証拠金維持率・マージンコール・ロスカットの正確な計算式(用語を正しく区別)を示し、清算エンジンの価格ソース選定やレース条件など実装上の考慮点に言及する回答。",
+      "files": [],
+      "assertions": [
+        "Explicitly states that Sera's deployed contracts (v1 and/or v2) do not natively support leverage/margin trading — it's spot-only",
+        "Presents at least two distinct architectural patterns for adding leverage (e.g. a synthetic/perpetual-style pattern and a lending-integrated/real-margin pattern)",
+        "States the margin level formula correctly as equity divided by used margin, times 100 (not e.g. balance/margin or margin/equity)",
+        "Distinguishes margin call (warning threshold) from loss-cut/liquidation (forced-close threshold) as two separate, independently configurable thresholds",
+        "Discusses price oracle/price-source choice for the liquidation engine (e.g. GraphQL latestPrice vs on-chain book vs external oracle) and its risk tradeoffs"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "stop-loss-take-profit-oco",
+      "prompt": "Sera Protocolのフロントエンドに、逆指値(ストップロス)と利益確定(テイクプロフィット)をセットで出せるOCO注文機能を追加したいです。Seraのコントラクトでどう実現すればいいか、設計と実装方針を教えてください。",
+      "expected_output": "SeraのコントラクトにはOCO/逆指値のようなオンチェーン条件付き注文プリミティブが存在しないことを明示し、v2のEIP-712署名注文モデル(ユーザーが署名しexecutorが提出)を条件付き注文のトリガー機構として応用する設計を提案する。トリガー監視(価格フィード選定)、OCOペアのキャンセル処理、同時トリガーなどの競合状態への言及を含む回答。",
+      "files": [],
+      "assertions": [
+        "Explicitly states Sera has no native on-chain primitive for conditional orders (stop-loss/take-profit/OCO) — only market and limit orders exist natively",
+        "Proposes building the trigger on top of v2's EIP-712 signed-order + executor-submission model (pre-signed order held until a trigger fires) rather than inventing an unrelated custody mechanism",
+        "Describes how the OCO pair is linked so that triggering one order cancels the other",
+        "Addresses a race condition or edge case explicitly (e.g. both OCO legs triggering in the same tick, or duplicate/idempotent trigger submission)",
+        "Discusses the price feed / trigger-watching mechanism (e.g. a keeper service or price polling) needed to detect the trigger condition"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "candlestick-trendline-ui",
+      "prompt": "Sera Protocolの取引画面に、ローソク足チャートとトレンドラインを描画できるテクニカル分析UIを追加したいです。SeraのGraphQLサブグラフから取れるデータを使って、Reactコンポーネントとしてどう実装すればいいですか？",
+      "expected_output": "Seraのサブグラフは個別トレード/フィルのみでOHLCキャンドルは提供されないため、トレードをタイムバケットに集計するロジック(open/high/low/close/volumeの正しい定義、境界揃え、空バケット処理)を説明し、lightweight-chartsのようなローソク足ネイティブ対応のチャートライブラリを推奨し、トレンドラインはユーザー描画前提であることに触れる回答。",
+      "files": [],
+      "assertions": [
+        "Correctly identifies Sera's subgraph chartLogs entity as a pre-aggregated OHLCV source to use as the primary data path (not just raw trades requiring full manual bucketing)",
+        "Describes manual OHLC bucketing semantics (open = first trade, close = last trade, high/low = max/min) at least as a fallback for cases chartLogs doesn't cover (thin/new markets, custom intervals)",
+        "Recommends a charting library with native candlestick support (e.g. lightweight-charts) rather than building candles from a general-purpose chart library's primitives",
+        "States that trend lines are typically user-drawn (two selected points) rather than algorithmically auto-detected by default",
+        "Addresses at least one data-pipeline edge case: empty/sparse chartLogs buckets, bucket boundary alignment for the manual fallback, or handling the in-progress/live candle"
+      ]
+    }
+  ]
+}

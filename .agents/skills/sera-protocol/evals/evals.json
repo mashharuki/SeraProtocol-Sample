@@ -1,0 +1,23 @@
+{
+  "skill_name": "sera-protocol",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "SeraProtocolのサブグラフからTWETH/TUSDCマーケットの板情報（bid/ask各5本）を取得するTypeScriptスクリプトを書いてください。viemは使わずfetchだけで。",
+      "expected_output": "GraphQL queryを使い、depths entityからbid/askを取得するfetch-basedのTypeScriptコード。正しいsubgraph URL、適切なwhere/orderBy/orderDirection条件、rawAmount_gt:0フィルタを含む。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Sera ProtocolでlimitBidを出すための完全な手順を教えて。トークンのapproveからtx送信、確認待ちまで。viemを使った具体的なコード例をください。priceIndex=12000, rawAmount=500で。",
+      "expected_output": "1)ERC20 approve→2)simulateContract→3)writeContract→4)waitForTransactionReceiptの完全なフロー。正しいROUTER_ADDRESS、LimitOrderParams構造体、deadline設定、postOnly=trueの安全設定を含むviemコード。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "SeraProtocolのMCPサーバーに新しいツール sera_get_chart_data を追加したい。OHLCV(ローソク足)データを返すread-onlyツールです。どのファイルをどう変更すればいい？",
+      "expected_output": "1)schemas/index.tsにZodスキーマ追加 2)services/subgraph.tsにchartLogs GraphQLクエリ関数追加 3)tools/read-tools.tsにツール登録。intervalType(1m,5m,15m,1h,4h,1d,1w)パラメータを含む。既存のコード構造・パターンに沿った実装方針。",
+      "files": []
+    }
+  ]
+}

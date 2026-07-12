@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "run_type": "with_skill",
+  "expectations": [
+    {"text": "correct_subgraph_url", "passed": true, "evidence": "Line 11: Uses exact Goldsky URL api.goldsky.com/api/public/project_cmicv6kkbhyto01u3agb155hg/subgraphs/sera-pro/1.0.9/gn"},
+    {"text": "correct_market_address", "passed": true, "evidence": "Line 14: MARKET_ID = '0x002930b390ac7d686f07cffb9d7ce39609d082d1'"},
+    {"text": "bid_ask_separation", "passed": true, "evidence": "Lines 79-98: Separate bids (isBid: true) and asks (isBid: false) queries"},
+    {"text": "correct_sort_order", "passed": true, "evidence": "Line 82-83: bids orderDirection: desc, Line 93-94: asks orderDirection: asc"},
+    {"text": "rawAmount_filter", "passed": true, "evidence": "Lines 80, 91: rawAmount_gt: '0' filter on both sides"},
+    {"text": "first_5_limit", "passed": true, "evidence": "Line 17: DEPTH_LEVELS = 5, passed as $first variable"},
+    {"text": "no_viem_import", "passed": true, "evidence": "No viem import anywhere. Uses only global fetch()"},
+    {"text": "valid_typescript", "passed": true, "evidence": "Proper interfaces, generic types, async/await. Well-structured and compilable."}
+  ]
+}

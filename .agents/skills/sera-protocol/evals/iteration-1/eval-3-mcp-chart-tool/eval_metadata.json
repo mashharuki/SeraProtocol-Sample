@@ -1,0 +1,42 @@
+{
+  "eval_id": 3,
+  "eval_name": "mcp-chart-tool",
+  "prompt": "SeraProtocolのMCPサーバーに新しいツール sera_get_chart_data を追加したい。OHLCV(ローソク足)データを返すread-onlyツールです。どのファイルをどう変更すればいい？",
+  "assertions": [
+    {
+      "name": "identifies_schema_file",
+      "description": "Identifies schemas/index.ts as needing a new Zod schema",
+      "type": "semantic"
+    },
+    {
+      "name": "identifies_subgraph_service",
+      "description": "Identifies services/subgraph.ts as needing a new query function",
+      "type": "semantic"
+    },
+    {
+      "name": "identifies_read_tools",
+      "description": "Identifies tools/read-tools.ts as where to register the new tool",
+      "type": "semantic"
+    },
+    {
+      "name": "chartlogs_query",
+      "description": "Includes a GraphQL query using the chartLogs entity",
+      "type": "semantic"
+    },
+    {
+      "name": "interval_type_param",
+      "description": "Includes intervalType parameter with valid options (1m, 5m, 15m, 1h, 4h, 1d, 1w)",
+      "type": "semantic"
+    },
+    {
+      "name": "follows_existing_patterns",
+      "description": "Code follows the existing patterns in the MCP server (Zod schema, service function, tool registration)",
+      "type": "semantic"
+    },
+    {
+      "name": "ohlcv_fields",
+      "description": "Mentions OHLCV fields: open, high, low, close, volume",
+      "type": "semantic"
+    }
+  ]
+}
