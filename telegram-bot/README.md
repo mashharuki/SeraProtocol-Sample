@@ -12,7 +12,7 @@ trade, English/Japanese, Mainnet + Sepolia.
 
 ## Demo Video
 
-[![https://github.com/user-attachments/assets/5d20c534-fc7a-4ebf-a76c-ccb2a8b05203]()](https://youtu.be/vDMDAgapwSU)
+[![https://github.com/user-attachments/assets/5d20c534-fc7a-4ebf-a76c-ccb2a8b05203](https://github.com/user-attachments/assets/5d20c534-fc7a-4ebf-a76c-ccb2a8b05203)](https://youtu.be/vDMDAgapwSU)
 
 ## Features
 
