@@ -34,15 +34,56 @@ const routeParams = {
   deadline: 1783822839,
 };
 
-function buildService(captured: {
-  typedData?: SeraTypedDataPayload;
+// Live /swap/quote shape (observed 2026-07-12): quote.permit is fully
+// wrapped and ready to sign verbatim, unlike route_params.
+const permitBlock = {
+  permit_required: true,
+  suggested_deadline: 1783822839,
+  eip712: {
+    domain: {
+      name: "JPYC",
+      version: "1",
+      chainId: 11155111,
+      verifyingContract: "0xjpyc",
+    },
+    types: {
+      Permit: [
+        { name: "owner", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ],
+    },
+    primaryType: "Permit",
+    message: {
+      owner: routeParams.taker,
+      spender: "0xspender",
+      value: "100000000",
+      nonce: 0,
+      deadline: 1783822839,
+    },
+  },
+};
+
+interface Captured {
+  typedData: SeraTypedDataPayload[];
   submitBody?: Record<string, unknown>;
-}) {
+}
+
+function newCaptured(): Captured {
+  return { typedData: [] };
+}
+
+function buildService(opts: { captured: Captured; permit?: unknown }) {
+  const { captured, permit } = opts;
   const rateService = {
     findToken: async (_network: string, symbol: string) => ({
       symbol,
       address:
-        symbol === "USDC" ? routeParams.inputToken : routeParams.outputToken,
+        symbol === "USDC" || symbol === "JPYC"
+          ? routeParams.inputToken
+          : routeParams.outputToken,
       decimals: 6,
     }),
   };
@@ -51,8 +92,8 @@ function buildService(captured: {
   };
   const signer = {
     signTypedData: async (_id: string, td: SeraTypedDataPayload) => {
-      captured.typedData = td;
-      return "0xsig";
+      captured.typedData.push(td);
+      return `0xsig${captured.typedData.length}`;
     },
   };
   const seraStub = {
@@ -63,6 +104,7 @@ function buildService(captured: {
       route_params: routeParams,
       quote_breakdown: { total_fee: "included in rate" },
       expires_at: Date.now() / 1000 + 30,
+      permit,
     }),
     submitSwap: async (body: Record<string, unknown>) => {
       captured.submitBody = body;
@@ -80,7 +122,8 @@ function buildService(captured: {
 
 describe("SwapService.prepareSwap", () => {
   test("reads minOutputAmount directly from the flat route_params (not route_params.message)", async () => {
-    const { service } = buildService({});
+    const captured = newCaptured();
+    const { service } = buildService({ captured });
     const card = await service.prepareSwap(user, {
       fromSymbol: "USDC",
       toSymbol: "USDT",
@@ -94,8 +137,8 @@ describe("SwapService.prepareSwap", () => {
 
 describe("SwapService.executeSwap", () => {
   test("wraps route_params in the Intent domain/types before signing", async () => {
-    const captured: { typedData?: SeraTypedDataPayload } = {};
-    const { service } = buildService(captured);
+    const captured = newCaptured();
+    const { service } = buildService({ captured });
     await service.executeSwap(user, {
       uuid: "quote-1",
       routeParams,
@@ -105,10 +148,11 @@ describe("SwapService.executeSwap", () => {
       minOutput: "90.225723",
       toDecimals: 6,
     });
-    expect(captured.typedData?.domain).toEqual(domain);
-    expect(captured.typedData?.primaryType).toBe("Intent");
-    expect(captured.typedData?.message).toEqual(routeParams);
-    const types = captured.typedData?.types as {
+    const [intentSig] = captured.typedData;
+    expect(intentSig?.domain).toEqual(domain);
+    expect(intentSig?.primaryType).toBe("Intent");
+    expect(intentSig?.message).toEqual(routeParams);
+    const types = intentSig?.types as {
       Intent: { name: string; type: string }[];
     };
     expect(types.Intent.map((f) => f.name)).toEqual([
@@ -124,9 +168,9 @@ describe("SwapService.executeSwap", () => {
     ]);
   });
 
-  test("submits the signature with the quote uuid", async () => {
-    const captured: { submitBody?: Record<string, unknown> } = {};
-    const { service } = buildService(captured);
+  test("submits the signature with the quote uuid and no permit fields when none is required", async () => {
+    const captured = newCaptured();
+    const { service } = buildService({ captured });
     await service.executeSwap(user, {
       uuid: "quote-1",
       routeParams,
@@ -138,7 +182,45 @@ describe("SwapService.executeSwap", () => {
     });
     expect(captured.submitBody).toEqual({
       uuid: "quote-1",
-      signature: "0xsig",
+      signature: "0xsig1",
+    });
+  });
+
+  test("signs and submits the permit when the quote requires one (e.g. JPYC)", async () => {
+    const captured = newCaptured();
+    const { service } = buildService({ captured, permit: permitBlock });
+    const card = await service.prepareSwap(user, {
+      fromSymbol: "JPYC",
+      toSymbol: "USDC",
+      amount: "1400",
+    });
+    // prepareSwap's own quote call shouldn't have signed anything yet.
+    expect(captured.typedData).toHaveLength(0);
+
+    // Re-fetch the payload the way callbacks.ts does: via the pending action.
+    // Here we just rebuild the equivalent payload directly for executeSwap.
+    await service.executeSwap(user, {
+      uuid: "quote-1",
+      routeParams,
+      fromSymbol: "JPYC",
+      toSymbol: "USDC",
+      fromAmount: "1400",
+      minOutput: card.minOutput,
+      toDecimals: 6,
+      permitEip712: permitBlock.eip712,
+      permitDeadline: permitBlock.suggested_deadline,
+    });
+
+    expect(captured.typedData).toHaveLength(2);
+    const [intentSig, permitSig] = captured.typedData;
+    expect(intentSig?.primaryType).toBe("Intent");
+    expect(permitSig?.primaryType).toBe("Permit");
+    expect(permitSig).toEqual(permitBlock.eip712 as SeraTypedDataPayload);
+    expect(captured.submitBody).toEqual({
+      uuid: "quote-1",
+      signature: "0xsig1",
+      permit_signature: "0xsig2",
+      permit_deadline: permitBlock.suggested_deadline,
     });
   });
 });

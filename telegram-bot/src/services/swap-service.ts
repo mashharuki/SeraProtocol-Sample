@@ -23,6 +23,14 @@ export interface SwapActionPayload {
   minOutput: string;
   toDecimals: number;
   recipient?: string;
+  /**
+   * Present when the input token needs an ERC-2612 permit alongside the
+   * Intent signature (e.g. JPYC, USDC, EURC). Unlike `route_params`, Sera
+   * returns this fully wrapped and ready to sign verbatim — confirmed live
+   * 2026-07-12 (`quote.permit.eip712 = {domain, types, primaryType, message}`).
+   */
+  permitEip712?: SeraTypedDataPayload;
+  permitDeadline?: number;
 }
 
 export interface SwapCard {
@@ -86,6 +94,26 @@ const INTENT_EIP712_TYPES: Record<string, unknown> = {
   ],
 };
 
+/**
+ * Some input tokens (JPYC, USDC, EURC, …) require an ERC-2612 permit
+ * alongside the Intent signature — `POST /swap` 400s otherwise ("Quote
+ * requires an EIP-2612 permit"). Only act when `permit_required` is set;
+ * `permit.eip712` is already the full ready-to-sign payload.
+ */
+function extractPermit(permit: SeraSwapQuote["permit"]): {
+  permitEip712?: SeraTypedDataPayload;
+  permitDeadline?: number;
+} {
+  if (!permit || typeof permit !== "object") return {};
+  const p = permit as {
+    permit_required?: boolean;
+    suggested_deadline?: number;
+    eip712?: SeraTypedDataPayload;
+  };
+  if (!p.permit_required || !p.eip712) return {};
+  return { permitEip712: p.eip712, permitDeadline: p.suggested_deadline };
+}
+
 export class SwapService {
   constructor(
     private rateService: RateService,
@@ -143,6 +171,7 @@ export class SwapService {
       fromRawUnits(minOutputRaw, meta.toDecimals),
     );
     const expiresAtMs = normalizeExpiry(quote.expires_at);
+    const { permitEip712, permitDeadline } = extractPermit(quote.permit);
 
     const payload: SwapActionPayload = {
       uuid: quote.uuid,
@@ -153,6 +182,8 @@ export class SwapService {
       minOutput,
       toDecimals: meta.toDecimals,
       recipient: meta.recipient,
+      permitEip712,
+      permitDeadline,
     };
     const actionId = await this.pendingActions.create({
       telegramUserId: user.telegramUserId,
@@ -209,8 +240,21 @@ export class SwapService {
       primaryType: "Intent",
       message: payload.routeParams,
     } satisfies SeraTypedDataPayload);
+    const permitSignature = payload.permitEip712
+      ? await this.signer.signTypedData(user.walletId, payload.permitEip712)
+      : undefined;
     try {
-      await sera.submitSwap({ uuid: payload.uuid, signature });
+      await sera.submitSwap({
+        uuid: payload.uuid,
+        signature,
+        ...(permitSignature !== undefined &&
+        payload.permitDeadline !== undefined
+          ? {
+              permit_signature: permitSignature,
+              permit_deadline: payload.permitDeadline,
+            }
+          : {}),
+      });
       return {
         status: "success",
         received: payload.minOutput,
