@@ -2,6 +2,8 @@
 
 Sera Protocol Sample Repo
 
+[My referral link](https://g.sera.cx/BZNtfMNt5h)
+
 ## Sample Query
 
 ### Market
