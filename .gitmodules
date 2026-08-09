@@ -4,3 +4,9 @@
 [submodule "sera-agents"]
 	path = sera-agents
 	url = https://github.com/sera-cx/sera-agents
+[submodule "Sera-Telegram-Bot"]
+	path = Sera-Telegram-Bot
+	url = https://github.com/mashharuki/Sera-Telegram-Bot.git
+[submodule "Sera-Sample-MCP-Server"]
+	path = Sera-Sample-MCP-Server
+	url = https://github.com/mashharuki/Sera-Sample-MCP-Server.git
