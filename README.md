@@ -73,3 +73,4 @@ curl -s -X POST \
 - [Deepwiki SeraProtocol OrderBook Contract V2](https://deepwiki.com/sera-cx/orderbook-contract-v2)
 - [Deepwiki Sera Pay](https://deepwiki.com/sera-cx/sera-pay)
 - [ドキュメント](https://docs.testnet.sera.cx/)
+- [Sera Explorer](https://explorer.sera.cx/)
